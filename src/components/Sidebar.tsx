@@ -5,6 +5,7 @@ import {
   Settings,
   Upload,
   Sparkles,
+  Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +22,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { playlistService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
+import { usePlayer } from "@/contexts/PlayerContext";
 
 const Sidebar = () => {
   const [playlists, setPlaylists] = useState<any[]>([]);
@@ -28,6 +30,7 @@ const Sidebar = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const location = useLocation();
   const { toast } = useToast();
+  const { currentPlaylistId, isPlaying } = usePlayer();
 
   // Carregar playlists do localStorage
   useEffect(() => {
@@ -134,7 +137,11 @@ const Sidebar = () => {
                     }`}
                   >
                     <Link to={`/playlist/${playlist.id}`}>
-                      <ListMusic className="mr-3 h-4 w-4 flex-shrink-0" />
+                      {currentPlaylistId === playlist.id && isPlaying ? (
+                        <Volume2 className="mr-3 h-4 w-4 flex-shrink-0 text-primary animate-pulse" />
+                      ) : (
+                        <ListMusic className="mr-3 h-4 w-4 flex-shrink-0" />
+                      )}
                       <span className="truncate">{playlist.name}</span>
                     </Link>
                   </Button>
@@ -199,7 +206,11 @@ const Sidebar = () => {
                   }`}
                 >
                   <Link to={`/playlist/${playlist.id}`}>
-                    <ListMusic className="mr-3 h-4 w-4 flex-shrink-0" />
+                    {currentPlaylistId === playlist.id && isPlaying ? (
+                      <Volume2 className="mr-3 h-4 w-4 flex-shrink-0 text-primary animate-pulse" />
+                    ) : (
+                      <ListMusic className="mr-3 h-4 w-4 flex-shrink-0" />
+                    )}
                     <span className="truncate">{playlist.name}</span>
                   </Link>
                 </Button>
