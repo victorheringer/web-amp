@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import Player from "@/components/Player";
 import VideoCard from "@/components/VideoCard";
@@ -6,15 +6,33 @@ import { useState, useEffect } from "react";
 import VideoModal from "@/components/VideoModal";
 import AddSongModal from "@/components/AddSongModal";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, Play, Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  LayoutGrid,
+  List,
+  Play,
+  Plus,
+  Settings,
+  Trash2,
+  Music,
+} from "lucide-react";
 import { playlistService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
 
 const Playlist = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddSongModalOpen, setIsAddSongModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [playlist, setPlaylist] = useState<any>(null);
   const { toast } = useToast();
 
@@ -77,6 +95,59 @@ const Playlist = () => {
     }
   };
 
+  const handleRemoveSong = (songId: string) => {
+    if (!id) return;
+
+    try {
+      const song = playlist?.songs.find((s: any) => s.id === songId);
+      const updatedPlaylist = playlistService.removeSong(id, songId);
+
+      if (updatedPlaylist) {
+        setPlaylist(updatedPlaylist);
+        toast({
+          title: "Música removida",
+          description: `"${song?.title || "Música"}" foi removida da playlist.`,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao remover música:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a música.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeletePlaylist = () => {
+    if (!id) return;
+
+    try {
+      const success = playlistService.delete(id);
+
+      if (success) {
+        toast({
+          title: "Playlist removida",
+          description: `"${playlist?.name}" foi removida com sucesso.`,
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível remover a playlist.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao remover playlist:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao remover a playlist.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const songs = playlist?.songs || [];
 
   return (
@@ -95,12 +166,21 @@ const Playlist = () => {
               </p>
             </div>
             <div className="flex gap-2">
+              {songs.length > 0 && (
+                <Button
+                  onClick={() => setIsAddSongModalOpen(true)}
+                  className="bg-primary hover:bg-primary-glow"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Adicionar Música
+                </Button>
+              )}
               <Button
-                onClick={() => setIsAddSongModalOpen(true)}
-                className="bg-primary hover:bg-primary-glow"
+                onClick={() => setIsSettingsModalOpen(true)}
+                variant="outline"
               >
-                <Plus className="h-5 w-5 mr-2" />
-                Adicionar Música
+                <Settings className="h-5 w-5 mr-2" />
+                Configurações
               </Button>
               <Button
                 size="icon"
@@ -119,10 +199,34 @@ const Playlist = () => {
             </div>
           </div>
 
-          {viewMode === "grid" ? (
+          {songs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 px-4">
+              <div className="rounded-full bg-muted p-6 mb-6">
+                <Music className="h-16 w-16 text-muted-foreground" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-center">
+                Nenhuma música ainda
+              </h2>
+              <p className="text-muted-foreground text-center mb-6 max-w-md">
+                Sua playlist está esperando por músicas incríveis! Adicione suas
+                faixas favoritas do YouTube ou SoundCloud e comece a curtir.
+              </p>
+              <Button
+                onClick={() => setIsAddSongModalOpen(true)}
+                className="bg-primary hover:bg-primary-glow"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Adicionar Primeira Música
+              </Button>
+            </div>
+          ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {songs.map((song) => (
-                <VideoCard key={song.id} song={song} />
+                <VideoCard
+                  key={song.id}
+                  song={song}
+                  onRemove={handleRemoveSong}
+                />
               ))}
             </div>
           ) : (
@@ -146,7 +250,10 @@ const Playlist = () => {
                   </Button>
 
                   <img
-                    src={song.thumbnail || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"}
+                    src={
+                      song.thumbnail ||
+                      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"
+                    }
                     alt={song.title}
                     className="w-16 h-16 object-cover rounded"
                   />
@@ -182,6 +289,45 @@ const Playlist = () => {
         onClose={() => setIsAddSongModalOpen(false)}
         onAddSong={handleAddSong}
       />
+
+      <Dialog open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Configurações da Playlist</DialogTitle>
+            <DialogDescription>
+              Gerenciar configurações de "{playlist?.name}"
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => {
+                if (
+                  confirm(
+                    `Tem certeza que deseja remover a playlist "${playlist?.name}"?`
+                  )
+                ) {
+                  handleDeletePlaylist();
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Remover Playlist
+            </Button>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsSettingsModalOpen(false)}
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

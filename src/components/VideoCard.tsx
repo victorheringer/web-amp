@@ -1,14 +1,21 @@
-import { Play, MoreVertical } from "lucide-react";
+import { Play, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Song } from "@/services";
 import { usePlayer } from "@/contexts/PlayerContext";
 
 interface VideoCardProps {
   song: Song;
+  onRemove?: (songId: string) => void;
 }
 
-const VideoCard = ({ song }: VideoCardProps) => {
+const VideoCard = ({ song, onRemove }: VideoCardProps) => {
   const { play, currentSong, isPlaying } = usePlayer();
   const isCurrentSong = currentSong?.id === song.id;
 
@@ -16,11 +23,21 @@ const VideoCard = ({ song }: VideoCardProps) => {
     play(song);
   };
 
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onRemove) {
+      onRemove(song.id);
+    }
+  };
+
   return (
     <Card className="group relative bg-card hover:bg-card/80 transition-all duration-300 overflow-hidden border-border cursor-pointer">
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={song.thumbnail || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"}
+          src={
+            song.thumbnail ||
+            "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"
+          }
           alt={song.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -45,22 +62,42 @@ const VideoCard = ({ song }: VideoCardProps) => {
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className={`font-semibold text-sm truncate transition-colors ${
-              isCurrentSong ? 'text-primary' : 'text-card-foreground group-hover:text-primary'
-            }`}>
+            <h3
+              className={`font-semibold text-sm truncate transition-colors ${
+                isCurrentSong
+                  ? "text-primary"
+                  : "text-card-foreground group-hover:text-primary"
+              }`}
+            >
               {song.title}
             </h3>
             <p className="text-xs text-muted-foreground truncate mt-1">
               {song.artist}
             </p>
           </div>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          {onRemove && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive cursor-pointer"
+                  onClick={handleRemove}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Remover da playlist
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
     </Card>
