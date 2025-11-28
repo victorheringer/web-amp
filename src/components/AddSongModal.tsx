@@ -150,7 +150,18 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
         });
       }
 
-      // Criar player temporário oculto para extrair dados
+      // Buscar metadados via NoEmbed (mais confiável para Título e Artista)
+      let noembedData: any = null;
+      try {
+        const response = await fetch(
+          `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`
+        );
+        noembedData = await response.json();
+      } catch (error) {
+        console.error("Erro ao buscar dados do noembed:", error);
+      }
+
+      // Criar player temporário oculto para extrair dados (principalmente duração)
       const tempContainer = document.createElement("div");
       tempContainer.style.display = "none";
       document.body.appendChild(tempContainer);
@@ -172,9 +183,13 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                 .toString()
                 .padStart(2, "0")}`;
 
+              // Priorizar dados do NoEmbed, fallback para dados do Player
+              const title = noembedData?.title || videoData.title || "";
+              const artist = noembedData?.author_name || videoData.author || "";
+
               // Preencher campos automaticamente
-              form.setValue("title", videoData.title || "");
-              form.setValue("artist", videoData.author || "");
+              form.setValue("title", title);
+              form.setValue("artist", artist);
               form.setValue("originalUrl", url);
               form.setValue("url", getYouTubeEmbedUrl(videoId));
               form.setValue("thumbnail", getYouTubeThumbnail(videoId));
@@ -184,7 +199,7 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
 
               toast({
                 title: "Informações extraídas!",
-                description: `"${videoData.title}" carregado com sucesso.`,
+                description: `"${title}" carregado com sucesso.`,
               });
 
               // Limpar player temporário
@@ -199,22 +214,37 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                   "Não foi possível extrair as informações do vídeo.",
                 variant: "destructive",
               });
-              event.target.destroy();
-              document.body.removeChild(tempContainer);
               setIsExtracting(false);
+              if (document.body.contains(tempContainer)) {
+                document.body.removeChild(tempContainer);
+              }
             }
           },
-          onError: (event: any) => {
-            console.error("Erro no player:", event);
-            toast({
-              title: "Erro",
-              description:
-                "Não foi possível carregar o vídeo. Verifique a URL.",
-              variant: "destructive",
-            });
-            event.target.destroy();
-            document.body.removeChild(tempContainer);
+          onError: () => {
+            // Se o player falhar, tentar usar apenas os dados do NoEmbed se disponíveis
+            if (noembedData) {
+              form.setValue("title", noembedData.title);
+              form.setValue("artist", noembedData.author_name);
+              form.setValue("originalUrl", url);
+              form.setValue("url", getYouTubeEmbedUrl(videoId));
+              form.setValue("thumbnail", getYouTubeThumbnail(videoId));
+
+              setHasExtracted(true);
+              toast({
+                title: "Informações parciais extraídas",
+                description: "Não foi possível obter a duração exata.",
+              });
+            } else {
+              toast({
+                title: "Erro",
+                description: "Erro ao carregar vídeo.",
+                variant: "destructive",
+              });
+            }
             setIsExtracting(false);
+            if (document.body.contains(tempContainer)) {
+              document.body.removeChild(tempContainer);
+            }
           },
         },
       });
