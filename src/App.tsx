@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 import Index from "./pages/Index";
 import Playlist from "./pages/Playlist";
@@ -34,9 +34,9 @@ const App = () => (
       <PlayerProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <HashRouter>
           <AppContent />
-        </BrowserRouter>
+        </HashRouter>
       </PlayerProvider>
     </TooltipProvider>
   </QueryClientProvider>
