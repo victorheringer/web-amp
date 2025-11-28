@@ -14,16 +14,29 @@ import { useToast } from "@/hooks/use-toast";
 interface VideoCardProps {
   song: Song;
   playlist?: Song[];
+  playlistId?: string;
   onRemove?: (songId: string) => void;
+  onClick?: () => void;
 }
 
-const VideoCard = ({ song, playlist, onRemove }: VideoCardProps) => {
+const VideoCard = ({
+  song,
+  playlist,
+  playlistId,
+  onRemove,
+  onClick,
+}: VideoCardProps) => {
   const { play, pause, resume, currentSong, isPlaying } = usePlayer();
   const { toast } = useToast();
   const isCurrentSong = currentSong?.id === song.id;
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (onClick) {
+      onClick();
+      return;
+    }
+
     if (isCurrentSong) {
       if (isPlaying) {
         pause();
@@ -31,7 +44,7 @@ const VideoCard = ({ song, playlist, onRemove }: VideoCardProps) => {
         resume();
       }
     } else {
-      play(song, playlist);
+      play(song, playlist, playlistId);
     }
   };
 

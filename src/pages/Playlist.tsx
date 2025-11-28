@@ -338,6 +338,7 @@ const Playlist = () => {
                   key={song.id}
                   song={song}
                   playlist={songs}
+                  playlistId={id}
                   onRemove={handleRemoveSong}
                 />
               ))}
@@ -356,7 +357,7 @@ const Playlist = () => {
                       resume();
                     }
                   } else {
-                    play(song, songs);
+                    play(song, songs, id);
                   }
                 };
 

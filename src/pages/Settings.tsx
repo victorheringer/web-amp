@@ -136,18 +136,28 @@ const Settings = () => {
 
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle>Token de Autenticação</CardTitle>
+                  <CardTitle>Token de Autenticação (OpenRouter)</CardTitle>
                   <CardDescription>
-                    Configure seu token para acessar recursos externos
+                    Configure seu token do OpenRouter para receber recomendações
+                    de artistas baseadas nas suas playlists.
+                    <br />
+                    <a
+                      href="https://openrouter.ai/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline inline-flex items-center mt-1"
+                    >
+                      Obter token no OpenRouter.ai
+                    </a>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="token">Token</Label>
+                    <Label htmlFor="token">Token OpenRouter</Label>
                     <Input
                       id="token"
                       type="password"
-                      placeholder="Digite seu token"
+                      placeholder="sk-or-..."
                       value={token}
                       onChange={(e) => setToken(e.target.value)}
                       className="bg-input border-border"

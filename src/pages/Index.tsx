@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import VideoCard from "@/components/VideoCard";
 import Player from "@/components/Player";
@@ -16,22 +16,40 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { playlistService } from "@/services";
+import { playlistService, settingsService, usageService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
-import { Music, Youtube, Sparkles, Plus, PlayCircle } from "lucide-react";
-import type { Song } from "@/services/types";
+import {
+  Music,
+  Youtube,
+  Sparkles,
+  Plus,
+  PlayCircle,
+  Settings,
+  TrendingUp,
+} from "lucide-react";
+import type { Song, Playlist } from "@/services/types";
 
 const Index = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [playlists, setPlaylists] = useState<any[]>([]);
+  const [topPlaylists, setTopPlaylists] = useState<Playlist[]>([]);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     const loadedPlaylists = playlistService.getAll();
     setPlaylists(loadedPlaylists);
+
+    const settings = settingsService.get();
+    setHasToken(!!settings.token);
+
+    if (loadedPlaylists.length > 0) {
+      const top = usageService.getTopPlaylists(loadedPlaylists);
+      setTopPlaylists(top);
+    }
   }, []);
 
   const handleCreatePlaylist = () => {
@@ -47,74 +65,7 @@ const Index = () => {
   };
 
   // Mock videos converted to Song format
-  const videos: Song[] = [
-    {
-      id: "1",
-      title: "Amazing Rock Performance Live",
-      artist: "Rock Band",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      provider: "youtube",
-      thumbnail:
-        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop",
-      duration: "4:12",
-      addedAt: Date.now(),
-    },
-    {
-      id: "2",
-      title: "Acoustic Session in Studio",
-      artist: "Indie Artist",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      provider: "youtube",
-      thumbnail:
-        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=225&fit=crop",
-      duration: "3:45",
-      addedAt: Date.now(),
-    },
-    {
-      id: "3",
-      title: "Electronic Dance Mix 2024",
-      artist: "DJ Master",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      provider: "youtube",
-      thumbnail:
-        "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=225&fit=crop",
-      duration: "5:30",
-      addedAt: Date.now(),
-    },
-    {
-      id: "4",
-      title: "Jazz Evening Performance",
-      artist: "Jazz Quartet",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      provider: "youtube",
-      thumbnail:
-        "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=400&h=225&fit=crop",
-      duration: "6:15",
-      addedAt: Date.now(),
-    },
-    {
-      id: "5",
-      title: "Pop Hits Medley",
-      artist: "Various Artists",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      provider: "youtube",
-      thumbnail:
-        "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=225&fit=crop",
-      duration: "3:20",
-      addedAt: Date.now(),
-    },
-    {
-      id: "6",
-      title: "Classical Piano Concert",
-      artist: "Piano Virtuoso",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      provider: "youtube",
-      thumbnail:
-        "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=400&h=225&fit=crop",
-      duration: "8:45",
-      addedAt: Date.now(),
-    },
-  ];
+  const videos: Song[] = [];
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -216,16 +167,98 @@ const Index = () => {
                 </p>
               </div>
 
+              {topPlaylists.length > 0 && (
+                <section className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    <h3 className="text-xl font-semibold">
+                      Suas Playlists Mais Ouvidas
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {topPlaylists.map((playlist) => (
+                      <div
+                        key={playlist.id}
+                        className="group relative bg-card hover:bg-card/80 transition-all duration-300 overflow-hidden border border-border cursor-pointer rounded-lg p-4"
+                        onClick={() => navigate(`/playlist/${playlist.id}`)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                            {playlist.songs[0]?.thumbnail ? (
+                              <img
+                                src={playlist.songs[0].thumbnail}
+                                alt={playlist.name}
+                                className="h-full w-full object-cover rounded-md"
+                              />
+                            ) : (
+                              <Music className="h-8 w-8 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-semibold truncate group-hover:text-primary transition-colors">
+                              {playlist.name}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {playlist.songs.length}{" "}
+                              {playlist.songs.length === 1
+                                ? "música"
+                                : "músicas"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               <section className="mb-8">
                 <h3 className="text-xl font-semibold mb-4">
                   Recomendados para você
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {videos.map((video) => (
-                    <VideoCard key={video.id} song={video} />
-                  ))}
-                </div>
+                {videos.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {videos.map((video) => (
+                      <VideoCard key={video.id} song={video} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-card/50 rounded-lg border border-dashed border-border">
+                    <p className="text-muted-foreground">
+                      Ainda não temos recomendações para você.
+                      <br />
+                      {!hasToken
+                        ? "Configure seu token de IA e continue ouvindo suas músicas favoritas para receber sugestões personalizadas!"
+                        : "Continue ouvindo suas músicas favoritas para receber sugestões personalizadas!"}
+                    </p>
+                  </div>
+                )}
               </section>
+
+              {!hasToken && (
+                <div className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-primary/20 rounded-full">
+                      <Sparkles className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">
+                        Ative as recomendações com IA
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Configure seu token OpenRouter para receber sugestões
+                        personalizadas de artistas.
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link to="/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Configurar
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </ScrollArea>

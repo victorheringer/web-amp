@@ -5,18 +5,19 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import { Song, VideoProvider } from "@/services";
+import { Song, VideoProvider, usageService } from "@/services";
 import { extractYouTubeVideoId } from "@/lib/videoUtils";
 
 interface PlayerContextType {
   currentSong: Song | null;
+  currentPlaylistId: string | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
   volume: number;
   isMuted: boolean;
   isShuffle: boolean;
-  play: (song: Song, playlist?: Song[]) => void;
+  play: (song: Song, playlist?: Song[], playlistId?: string) => void;
   pause: () => void;
   resume: () => void;
   stop: () => void;
@@ -45,6 +46,9 @@ interface PlayerProviderProps {
 
 export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(
+    null
+  );
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -55,6 +59,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const progressIntervalRef = useRef<number | null>(null);
+  const usageIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Cleanup on unmount
@@ -66,8 +71,31 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
+      if (usageIntervalRef.current) {
+        clearInterval(usageIntervalRef.current);
+      }
     };
   }, []);
+
+  // Track usage every 30 seconds if playing
+  useEffect(() => {
+    if (isPlaying && currentPlaylistId) {
+      usageIntervalRef.current = window.setInterval(() => {
+        usageService.recordListenTime(currentPlaylistId, 30);
+      }, 30000);
+    } else {
+      if (usageIntervalRef.current) {
+        clearInterval(usageIntervalRef.current);
+        usageIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (usageIntervalRef.current) {
+        clearInterval(usageIntervalRef.current);
+      }
+    };
+  }, [isPlaying, currentPlaylistId]);
 
   // Update progress bar every 100ms when playing
   useEffect(() => {
@@ -174,10 +202,15 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     });
   };
 
-  const play = async (song: Song, playlist?: Song[]) => {
+  const play = async (song: Song, playlist?: Song[], playlistId?: string) => {
     try {
       if (playlist) {
         setQueue(playlist);
+      }
+
+      if (playlistId) {
+        setCurrentPlaylistId(playlistId);
+        usageService.recordPlay(playlistId);
       }
 
       setCurrentSong(song);
@@ -314,6 +347,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     <PlayerContext.Provider
       value={{
         currentSong,
+        currentPlaylistId,
         isPlaying,
         currentTime,
         duration,
