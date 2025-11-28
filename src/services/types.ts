@@ -10,6 +10,7 @@ export interface Song {
   thumbnail?: string;
   duration?: string;
   addedAt: number;
+  recommendationReason?: string;
 }
 
 export interface Playlist {

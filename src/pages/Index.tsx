@@ -16,7 +16,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { playlistService, settingsService, usageService } from "@/services";
+import {
+  playlistService,
+  settingsService,
+  usageService,
+  recommendationService,
+} from "@/services";
 import { useToast } from "@/hooks/use-toast";
 import {
   Music,
@@ -26,6 +31,7 @@ import {
   PlayCircle,
   Settings,
   TrendingUp,
+  RefreshCw,
 } from "lucide-react";
 import type { Song, Playlist } from "@/services/types";
 
@@ -33,6 +39,9 @@ const Index = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [topPlaylists, setTopPlaylists] = useState<Playlist[]>([]);
+  const [recommendations, setRecommendations] = useState<Song[]>([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hasToken, setHasToken] = useState(false);
@@ -49,8 +58,32 @@ const Index = () => {
     if (loadedPlaylists.length > 0) {
       const top = usageService.getTopPlaylists(loadedPlaylists);
       setTopPlaylists(top);
+
+      if (settings.token) {
+        loadRecommendations(loadedPlaylists);
+      }
     }
   }, []);
+
+  const loadRecommendations = async (
+    currentPlaylists: Playlist[],
+    force: boolean = false
+  ) => {
+    setIsLoadingRecommendations(true);
+    try {
+      const recs = await recommendationService.getRecommendations(
+        currentPlaylists,
+        5,
+        force
+      );
+      setRecommendations(recs);
+    } catch (error) {
+      console.error(error);
+      // Silent error or toast?
+    } finally {
+      setIsLoadingRecommendations(false);
+    }
+  };
 
   const handleCreatePlaylist = () => {
     if (newPlaylistName.trim()) {
@@ -63,9 +96,6 @@ const Index = () => {
       navigate(`/playlist/${newPlaylist.id}`);
     }
   };
-
-  // Mock videos converted to Song format
-  const videos: Song[] = [];
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -213,12 +243,39 @@ const Index = () => {
               )}
 
               <section className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">
-                  Recomendados para você
-                </h3>
-                {videos.length > 0 ? (
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">
+                    Recomendados para você
+                  </h3>
+                  {hasToken && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => loadRecommendations(playlists, true)}
+                      disabled={isLoadingRecommendations}
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 mr-2 ${
+                          isLoadingRecommendations ? "animate-spin" : ""
+                        }`}
+                      />
+                      Atualizar
+                    </Button>
+                  )}
+                </div>
+
+                {isLoadingRecommendations ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {videos.map((video) => (
+                    {[1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="h-64 bg-muted animate-pulse rounded-xl"
+                      />
+                    ))}
+                  </div>
+                ) : recommendations.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {recommendations.map((video) => (
                       <VideoCard key={video.id} song={video} />
                     ))}
                   </div>
