@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import VideoCard from "@/components/VideoCard";
+import RecommendationCard from "@/components/RecommendationCard";
 import Player from "@/components/Player";
 import VideoModal from "@/components/VideoModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -73,13 +74,18 @@ const Index = () => {
     try {
       const recs = await recommendationService.getRecommendations(
         currentPlaylists,
-        5,
+        8,
         force
       );
       setRecommendations(recs);
     } catch (error) {
       console.error(error);
-      // Silent error or toast?
+      toast({
+        title: "Erro ao carregar recomendações",
+        description:
+          "Não foi possível obter sugestões da IA. Verifique seu token ou tente novamente mais tarde.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoadingRecommendations(false);
     }
@@ -276,7 +282,7 @@ const Index = () => {
                 ) : recommendations.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {recommendations.map((video) => (
-                      <VideoCard key={video.id} song={video} />
+                      <RecommendationCard key={video.id} song={video} />
                     ))}
                   </div>
                 ) : (

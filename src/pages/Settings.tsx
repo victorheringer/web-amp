@@ -12,14 +12,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Trash2, LayoutGrid, List } from "lucide-react";
+import { Save, Trash2, LayoutGrid, List, Search } from "lucide-react";
 import VideoModal from "@/components/VideoModal";
 
 const Settings = () => {
   const [token, setToken] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchProvider, setSearchProvider] = useState<"youtube">("youtube");
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -30,6 +38,9 @@ const Settings = () => {
     }
     if (settings.viewMode) {
       setViewMode(settings.viewMode);
+    }
+    if (settings.searchProvider) {
+      setSearchProvider(settings.searchProvider);
     }
   }, []);
 
@@ -65,6 +76,17 @@ const Settings = () => {
       title: "Modo de visualização salvo",
       description: `O modo de visualização foi alterado para ${
         value === "grid" ? "Grade" : "Lista"
+      }.`,
+    });
+  };
+
+  const handleSearchProviderChange = (value: "youtube") => {
+    setSearchProvider(value);
+    settingsService.setSearchProvider(value);
+    toast({
+      title: "Provedor de busca salvo",
+      description: `O provedor de busca foi alterado para ${
+        value === "youtube" ? "YouTube" : value
       }.`,
     });
   };
@@ -131,6 +153,33 @@ const Settings = () => {
                       </Label>
                     </div>
                   </RadioGroup>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle>Provedor de Busca</CardTitle>
+                  <CardDescription>
+                    Escolha onde as recomendações serão abertas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-4">
+                    <Search className="h-5 w-5 text-muted-foreground" />
+                    <Select
+                      value={searchProvider}
+                      onValueChange={(value: "youtube") =>
+                        handleSearchProviderChange(value)
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione um provedor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="youtube">YouTube</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </CardContent>
               </Card>
 

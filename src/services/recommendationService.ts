@@ -15,7 +15,7 @@ interface StoredData {
 export const recommendationService = {
   getRecommendations: async (
     allPlaylists: Playlist[],
-    limit: number = 5,
+    limit: number = 8,
     forceUpdate: boolean = false
   ): Promise<Song[]> => {
     // Check cache first

@@ -26,4 +26,5 @@ export interface AppSettings {
   token?: string;
   theme?: "light" | "dark" | "system";
   viewMode?: "grid" | "list";
+  searchProvider?: "youtube";
 }

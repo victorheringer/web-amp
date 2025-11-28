@@ -50,6 +50,17 @@ export const settingsService = {
     saveSettings(settings);
   },
 
+  getSearchProvider: (): "youtube" => {
+    const settings = getSettings();
+    return settings.searchProvider || "youtube";
+  },
+
+  setSearchProvider: (provider: "youtube"): void => {
+    const settings = getSettings();
+    settings.searchProvider = provider;
+    saveSettings(settings);
+  },
+
   update: (updates: Partial<AppSettings>): AppSettings => {
     const settings = getSettings();
     const updatedSettings = { ...settings, ...updates };

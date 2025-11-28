@@ -48,7 +48,7 @@ const formSchema = z.object({
   artist: z.string().min(1, "O artista é obrigatório"),
   url: z.string().min(1, "A URL é obrigatória"),
   originalUrl: z.string().optional(),
-  provider: z.enum(["youtube", "soundcloud"], {
+  provider: z.enum(["youtube"], {
     required_error: "Selecione um provedor",
   }),
   thumbnail: z.string().optional().or(z.literal("")),
@@ -274,7 +274,6 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="youtube">YouTube</SelectItem>
-                      <SelectItem value="soundcloud">SoundCloud</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
