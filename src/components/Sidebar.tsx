@@ -10,29 +10,34 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { playlistService } from "@/services";
+import { useToast } from "@/hooks/use-toast";
 
 const Sidebar = () => {
-  const [playlists, setPlaylists] = useState([
-    { id: 1, name: "Minhas Favoritas" },
-    { id: 2, name: "Rock Clássico" },
-    { id: 3, name: "Workout Mix" },
-    { id: 4, name: "Chill Vibes" },
-  ]);
+  const [playlists, setPlaylists] = useState<any[]>([]);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const location = useLocation();
+  const { toast } = useToast();
+
+  // Carregar playlists do localStorage
+  useEffect(() => {
+    const loadedPlaylists = playlistService.getAll();
+    setPlaylists(loadedPlaylists);
+  }, []);
 
   const handleCreatePlaylist = () => {
     if (newPlaylistName.trim()) {
-      const newPlaylist = {
-        id: playlists.length + 1,
-        name: newPlaylistName.trim(),
-      };
+      const newPlaylist = playlistService.create(newPlaylistName.trim());
       setPlaylists([...playlists, newPlaylist]);
       setNewPlaylistName("");
       setIsDialogOpen(false);
+      toast({
+        title: "Playlist criada",
+        description: `"${newPlaylistName}" foi criada com sucesso.`,
+      });
     }
   };
 
