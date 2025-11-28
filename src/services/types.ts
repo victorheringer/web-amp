@@ -1,4 +1,4 @@
-export type VideoProvider = 'youtube' | 'soundcloud' | 'vimeo' | 'dailymotion';
+export type VideoProvider = "youtube" | "soundcloud" | "vimeo" | "dailymotion";
 
 export interface Song {
   id: string;
@@ -22,5 +22,6 @@ export interface Playlist {
 
 export interface AppSettings {
   token?: string;
-  theme?: 'light' | 'dark' | 'system';
+  theme?: "light" | "dark" | "system";
+  viewMode?: "grid" | "list";
 }

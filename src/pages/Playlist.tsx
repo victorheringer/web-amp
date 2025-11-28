@@ -28,7 +28,7 @@ import {
   Music,
   Share2,
 } from "lucide-react";
-import { playlistService } from "@/services";
+import { playlistService, settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
 import { usePlayer } from "@/contexts/PlayerContext";
 import {
@@ -42,7 +42,9 @@ const Playlist = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">(() =>
+    settingsService.getViewMode()
+  );
   const [isAddSongModalOpen, setIsAddSongModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [playlist, setPlaylist] = useState<any>(null);
@@ -268,14 +270,20 @@ const Playlist = () => {
               <Button
                 size="icon"
                 variant={viewMode === "grid" ? "default" : "ghost"}
-                onClick={() => setViewMode("grid")}
+                onClick={() => {
+                  setViewMode("grid");
+                  settingsService.setViewMode("grid");
+                }}
               >
                 <LayoutGrid className="h-5 w-5" />
               </Button>
               <Button
                 size="icon"
                 variant={viewMode === "list" ? "default" : "ghost"}
-                onClick={() => setViewMode("list")}
+                onClick={() => {
+                  setViewMode("list");
+                  settingsService.setViewMode("list");
+                }}
               >
                 <List className="h-5 w-5" />
               </Button>

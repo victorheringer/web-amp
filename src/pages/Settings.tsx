@@ -4,14 +4,22 @@ import Player from "@/components/Player";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Trash2 } from "lucide-react";
+import { Save, Trash2, LayoutGrid, List } from "lucide-react";
 import VideoModal from "@/components/VideoModal";
 
 const Settings = () => {
   const [token, setToken] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -19,6 +27,9 @@ const Settings = () => {
     const settings = settingsService.get();
     if (settings.token) {
       setToken(settings.token);
+    }
+    if (settings.viewMode) {
+      setViewMode(settings.viewMode);
     }
   }, []);
 
@@ -47,61 +58,119 @@ const Settings = () => {
     });
   };
 
+  const handleViewModeChange = (value: "grid" | "list") => {
+    setViewMode(value);
+    settingsService.setViewMode(value);
+    toast({
+      title: "Modo de visualização salvo",
+      description: `O modo de visualização foi alterado para ${
+        value === "grid" ? "Grade" : "Lista"
+      }.`,
+    });
+  };
+
   return (
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div className="p-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-              Configurações
-            </h1>
-            <p className="text-muted-foreground">
-              Gerencie as configurações da sua aplicação
-            </p>
-          </div>
+          <div className="max-w-2xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+                Configurações
+              </h1>
+              <p className="text-muted-foreground">
+                Gerencie as configurações da sua aplicação
+              </p>
+            </div>
 
-          <div className="max-w-2xl">
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle>Token de Autenticação</CardTitle>
-                <CardDescription>
-                  Configure seu token para acessar recursos externos
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="token">Token</Label>
-                  <Input
-                    id="token"
-                    type="password"
-                    placeholder="Digite seu token"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    className="bg-input border-border"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleSaveToken}
-                    className="bg-primary hover:bg-primary-glow"
+            <div className="space-y-6">
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle>Visualização</CardTitle>
+                  <CardDescription>
+                    Escolha como você prefere visualizar suas playlists
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    defaultValue="grid"
+                    value={viewMode}
+                    onValueChange={(value) =>
+                      handleViewModeChange(value as "grid" | "list")
+                    }
+                    className="grid grid-cols-2 gap-4"
                   >
-                    <Save className="h-4 w-4 mr-2" />
-                    Salvar Token
-                  </Button>
-                  {token && (
+                    <div>
+                      <RadioGroupItem
+                        value="grid"
+                        id="grid"
+                        className="peer sr-only"
+                      />
+                      <Label
+                        htmlFor="grid"
+                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                      >
+                        <LayoutGrid className="mb-3 h-6 w-6" />
+                        Grid
+                      </Label>
+                    </div>
+                    <div>
+                      <RadioGroupItem
+                        value="list"
+                        id="list"
+                        className="peer sr-only"
+                      />
+                      <Label
+                        htmlFor="list"
+                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                      >
+                        <List className="mb-3 h-6 w-6" />
+                        Lista
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle>Token de Autenticação</CardTitle>
+                  <CardDescription>
+                    Configure seu token para acessar recursos externos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="token">Token</Label>
+                    <Input
+                      id="token"
+                      type="password"
+                      placeholder="Digite seu token"
+                      value={token}
+                      onChange={(e) => setToken(e.target.value)}
+                      className="bg-input border-border"
+                    />
+                  </div>
+                  <div className="flex gap-2">
                     <Button
-                      onClick={handleRemoveToken}
-                      variant="destructive"
+                      onClick={handleSaveToken}
+                      className="bg-primary hover:bg-primary-glow"
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Remover Token
+                      <Save className="h-4 w-4 mr-2" />
+                      Salvar Token
                     </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    {token && (
+                      <Button onClick={handleRemoveToken} variant="destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Remover Token
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </main>

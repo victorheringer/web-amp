@@ -1,6 +1,6 @@
-import { AppSettings } from './types';
+import { AppSettings } from "./types";
 
-const SETTINGS_STORAGE_KEY = 'web-amp-settings';
+const SETTINGS_STORAGE_KEY = "web-amp-settings";
 
 const getSettings = (): AppSettings => {
   const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
@@ -8,7 +8,7 @@ const getSettings = (): AppSettings => {
   try {
     return JSON.parse(stored);
   } catch (error) {
-    console.error('Failed to parse settings from localStorage', error);
+    console.error("Failed to parse settings from localStorage", error);
     return {};
   }
 };
@@ -36,6 +36,17 @@ export const settingsService = {
   removeToken: (): void => {
     const settings = getSettings();
     delete settings.token;
+    saveSettings(settings);
+  },
+
+  getViewMode: (): "grid" | "list" => {
+    const settings = getSettings();
+    return settings.viewMode || "grid";
+  },
+
+  setViewMode: (viewMode: "grid" | "list"): void => {
+    const settings = getSettings();
+    settings.viewMode = viewMode;
     saveSettings(settings);
   },
 

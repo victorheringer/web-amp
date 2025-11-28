@@ -119,7 +119,7 @@ const Player = ({ onExpand }: PlayerProps) => {
             <Button
               size="icon"
               variant="ghost"
-              className="text-foreground hover:text-primary"
+              className="text-foreground hover:text-white"
               onClick={playPrevious}
             >
               <SkipBack className="h-5 w-5" />
@@ -138,7 +138,7 @@ const Player = ({ onExpand }: PlayerProps) => {
             <Button
               size="icon"
               variant="ghost"
-              className="text-foreground hover:text-primary"
+              className="text-foreground hover:text-white"
               onClick={playNext}
             >
               <SkipForward className="h-5 w-5" />
