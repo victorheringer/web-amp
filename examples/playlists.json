@@ -1,0 +1,128 @@
+[
+  {
+    "name": "My Playlist",
+    "description": "",
+    "songs": [
+      {
+        "title": "Tech N9ne - Worldwide Choppers ( Busta Rhymes, Yelawolf, Twista..) (Music Video)",
+        "artist": "Tech N9ne",
+        "url": "https://www.youtube.com/embed/9zEGeZnRswM",
+        "originalUrl": "https://www.youtube.com/watch?v=9zEGeZnRswM&list=RD9zEGeZnRswM&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/9zEGeZnRswM/maxresdefault.jpg",
+        "duration": "5:27",
+        "provider": "youtube"
+      },
+      {
+        "title": "Out Of Control",
+        "artist": "Hoobastank",
+        "url": "https://www.youtube.com/embed/E17HnEMloDc",
+        "originalUrl": "https://www.youtube.com/watch?v=E17HnEMloDc&list=RDE17HnEMloDc&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/E17HnEMloDc/maxresdefault.jpg",
+        "duration": "2:45",
+        "provider": "youtube"
+      },
+      {
+        "title": "Dance, Dance (Official Music Video)",
+        "artist": "Fall Out Boy",
+        "url": "https://www.youtube.com/embed/C6MOKXm8x50",
+        "originalUrl": "https://www.youtube.com/watch?v=C6MOKXm8x50&list=RDC6MOKXm8x50&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/C6MOKXm8x50/maxresdefault.jpg",
+        "duration": "4:38",
+        "provider": "youtube"
+      },
+      {
+        "title": "Usher - Yeah! (Official Video) ft. Lil Jon, Ludacris",
+        "artist": "User",
+        "url": "https://www.youtube.com/embed/GxBSyx85Kp8",
+        "originalUrl": "https://www.youtube.com/watch?v=GxBSyx85Kp8&list=RDGxBSyx85Kp8&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/GxBSyx85Kp8/maxresdefault.jpg",
+        "duration": "4:13",
+        "provider": "youtube"
+      },
+      {
+        "title": "Space Oddity (Official Video)",
+        "artist": "David Bowie",
+        "url": "https://www.youtube.com/embed/iYYRH4apXDo",
+        "originalUrl": "https://www.youtube.com/watch?v=iYYRH4apXDo&list=RDiYYRH4apXDo&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/iYYRH4apXDo/maxresdefault.jpg",
+        "duration": "5:05",
+        "provider": "youtube"
+      },
+      {
+        "title": "Numb (Official Music Video) [4K UPGRADE]",
+        "artist": "Linkin Park",
+        "url": "https://www.youtube.com/embed/kXYiU_JCYtU",
+        "originalUrl": "https://www.youtube.com/watch?v=kXYiU_JCYtU&list=RDkXYiU_JCYtU&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/kXYiU_JCYtU/maxresdefault.jpg",
+        "duration": "3:08",
+        "provider": "youtube"
+      },
+      {
+        "title": "In The End [Official HD Music Video] - Linkin Park",
+        "artist": "Linkin Park",
+        "url": "https://www.youtube.com/embed/eVTXPUF4Oz4",
+        "originalUrl": "https://www.youtube.com/watch?v=eVTXPUF4Oz4&list=RDeVTXPUF4Oz4&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/eVTXPUF4Oz4/maxresdefault.jpg",
+        "duration": "3:39",
+        "provider": "youtube"
+      }
+    ]
+  },
+  {
+    "name": "Other Playlist",
+    "description": "",
+    "songs": [
+      {
+        "title": "Feira de Mangaio | Mariana Aydar + Felipe Cordeiro + Marcelo Jeneci",
+        "artist": "Mariana Aydar",
+        "url": "https://www.youtube.com/embed/fdPMm4-ZNaU",
+        "originalUrl": "https://www.youtube.com/watch?v=fdPMm4-ZNaU&list=RDfdPMm4-ZNaU&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/fdPMm4-ZNaU/maxresdefault.jpg",
+        "duration": "3:56",
+        "provider": "youtube"
+      },
+      {
+        "title": "Mariana Aydar - Onde Está Você",
+        "artist": "Mariana Aydar",
+        "url": "https://www.youtube.com/embed/1wzeMnhXMlE",
+        "originalUrl": "https://www.youtube.com/watch?v=1wzeMnhXMlE&list=RD1wzeMnhXMlE&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/1wzeMnhXMlE/maxresdefault.jpg",
+        "duration": "4:02",
+        "provider": "youtube"
+      }
+    ]
+  },
+  {
+    "name": "My Vibe",
+    "description": "Playlist gerada por IA baseada na vibe: \"Gosto de tranquilidade mas também estou animado! Estou nessas duas vibes\"",
+    "songs": [
+      {
+        "title": "Usher - Yeah! (Official Video) ft. Lil Jon, Ludacris",
+        "artist": "User",
+        "url": "https://www.youtube.com/embed/GxBSyx85Kp8",
+        "originalUrl": "https://www.youtube.com/watch?v=GxBSyx85Kp8&list=RDGxBSyx85Kp8&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/GxBSyx85Kp8/maxresdefault.jpg",
+        "duration": "4:13",
+        "provider": "youtube"
+      },
+      {
+        "title": "Feira de Mangaio | Mariana Aydar + Felipe Cordeiro + Marcelo Jeneci",
+        "artist": "Mariana Aydar",
+        "url": "https://www.youtube.com/embed/fdPMm4-ZNaU",
+        "originalUrl": "https://www.youtube.com/watch?v=fdPMm4-ZNaU&list=RDfdPMm4-ZNaU&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/fdPMm4-ZNaU/maxresdefault.jpg",
+        "duration": "3:56",
+        "provider": "youtube"
+      },
+      {
+        "title": "Mariana Aydar - Onde Está Você",
+        "artist": "Mariana Aydar",
+        "url": "https://www.youtube.com/embed/1wzeMnhXMlE",
+        "originalUrl": "https://www.youtube.com/watch?v=1wzeMnhXMlE&list=RD1wzeMnhXMlE&start_radio=1",
+        "thumbnail": "https://img.youtube.com/vi/1wzeMnhXMlE/maxresdefault.jpg",
+        "duration": "4:02",
+        "provider": "youtube"
+      }
+    ]
+  }
+]
