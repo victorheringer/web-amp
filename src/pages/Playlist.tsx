@@ -27,6 +27,7 @@ import {
   Trash2,
   Music,
   Share2,
+  Sparkles,
 } from "lucide-react";
 import { playlistService, settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
@@ -254,6 +255,18 @@ const Playlist = () => {
     }
   };
 
+  const handleConvertPlaylist = () => {
+    if (!id) return;
+    const updated = playlistService.convertVibeToNormal(id);
+    if (updated) {
+      setPlaylist(updated);
+      toast({
+        title: "Playlist convertida!",
+        description: "Esta playlist agora é permanente.",
+      });
+    }
+  };
+
   const songs = playlist?.songs || [];
 
   return (
@@ -272,7 +285,17 @@ const Playlist = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              {songs.length > 0 && (
+              {playlist?.isVibe && (
+                <Button
+                  onClick={handleConvertPlaylist}
+                  variant="secondary"
+                  className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Salvar na Biblioteca
+                </Button>
+              )}
+              {songs.length > 0 && !playlist?.isVibe && (
                 <Button
                   onClick={() => setIsAddSongModalOpen(true)}
                   className="bg-primary hover:bg-primary-glow"
@@ -323,13 +346,15 @@ const Playlist = () => {
                 Sua playlist está esperando por músicas incríveis! Adicione suas
                 faixas favoritas do YouTube ou SoundCloud e comece a curtir.
               </p>
-              <Button
-                onClick={() => setIsAddSongModalOpen(true)}
-                className="bg-primary hover:bg-primary-glow"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                Adicionar Primeira Música
-              </Button>
+              {!playlist?.isVibe && (
+                <Button
+                  onClick={() => setIsAddSongModalOpen(true)}
+                  className="bg-primary hover:bg-primary-glow"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Adicionar Primeira Música
+                </Button>
+              )}
             </div>
           ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

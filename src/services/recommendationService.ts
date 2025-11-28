@@ -160,4 +160,126 @@ export const recommendationService = {
       throw error;
     }
   },
+
+  createVibePlaylist: async (
+    allPlaylists: Playlist[],
+    vibe: string
+  ): Promise<{ name: string; songIds: string[] }> => {
+    const token = settingsService.getToken();
+    if (!token) {
+      throw new Error("Token OpenRouter não configurado");
+    }
+
+    const client = new OpenRouter({
+      apiKey: token,
+      httpReferer: window.location.origin,
+      xTitle: "Web Amp",
+    });
+
+    // Collect all unique songs from all playlists
+    const allSongs = new Map<
+      string,
+      { title: string; artist: string; id: string }
+    >();
+
+    allPlaylists.forEach((playlist) => {
+      playlist.songs.forEach((song) => {
+        // Create a unique key based on title and artist to avoid duplicates
+        const key = `${song.title.toLowerCase()}-${song.artist.toLowerCase()}`;
+        if (!allSongs.has(key)) {
+          allSongs.set(key, {
+            title: song.title,
+            artist: song.artist,
+            id: song.id, // We'll use the first ID found for this song
+          });
+        }
+      });
+    });
+
+    const songsList = Array.from(allSongs.values());
+
+    if (songsList.length === 0) {
+      return { name: "", songIds: [] };
+    }
+
+    // Prepare the list for the prompt (index: Title - Artist)
+    const songsPromptList = songsList
+      .map((s, index) => `${index}: ${s.title} - ${s.artist}`)
+      .join("\n");
+
+    const prompt = `
+      O usuário está se sentindo assim: "${vibe}"
+
+      Abaixo está a lista de todas as músicas disponíveis nas playlists dele:
+      ${songsPromptList}
+
+      Sua tarefa é selecionar quais dessas músicas combinam com o sentimento/vibe do usuário.
+      Também sugira um nome curto e criativo para a playlist (máximo 30 caracteres).
+      
+      Retorne APENAS um objeto JSON com o seguinte formato:
+      {
+        "name": "Nome da Playlist",
+        "indices": [0, 5, 12, 15]
+      }
+      
+      Não inclua markdown, apenas o JSON cru.
+    `;
+
+    try {
+      const completion = await client.chat.send({
+        model: MODEL,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Você é um DJ especialista em criar playlists baseadas em sentimentos. Responda apenas com JSON.",
+          },
+          { role: "user", content: prompt },
+        ],
+      });
+
+      const content = completion.choices?.[0]?.message?.content;
+      if (!content) return { name: "", songIds: [] };
+
+      let contentStr = "";
+      if (typeof content === "string") {
+        contentStr = content;
+      } else if (Array.isArray(content)) {
+        contentStr = content
+          .filter((part: any) => part.type === "text")
+          .map((part: any) => part.text || "")
+          .join("");
+      }
+
+      // Clean up markdown code blocks if present
+      const jsonStr = contentStr
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      let result: { name: string; indices: number[] } = {
+        name: "",
+        indices: [],
+      };
+      try {
+        result = JSON.parse(jsonStr);
+      } catch (e) {
+        console.error("Failed to parse vibe playlist JSON", e);
+        return { name: "", songIds: [] };
+      }
+
+      // Map indices back to song IDs
+      const selectedSongIds = result.indices
+        .filter((index) => index >= 0 && index < songsList.length)
+        .map((index) => songsList[index].id);
+
+      return {
+        name: result.name || vibe,
+        songIds: selectedSongIds,
+      };
+    } catch (error) {
+      console.error("Erro ao criar playlist de vibe:", error);
+      throw error;
+    }
+  },
 };

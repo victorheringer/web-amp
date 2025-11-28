@@ -20,6 +20,8 @@ export interface Playlist {
   songs: Song[];
   createdAt: number;
   updatedAt: number;
+  isVibe?: boolean;
+  expiresAt?: number;
 }
 
 export interface AppSettings {

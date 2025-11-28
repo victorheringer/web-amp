@@ -5,6 +5,7 @@ import VideoCard from "@/components/VideoCard";
 import RecommendationCard from "@/components/RecommendationCard";
 import Player from "@/components/Player";
 import VideoModal from "@/components/VideoModal";
+import VibeModal from "@/components/VibeModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +46,7 @@ const Index = () => {
     useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isVibeModalOpen, setIsVibeModalOpen] = useState(false);
   const [hasToken, setHasToken] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -100,6 +102,65 @@ const Index = () => {
       });
       setIsDialogOpen(false);
       navigate(`/playlist/${newPlaylist.id}`);
+    }
+  };
+
+  const handleCreateVibe = async (vibe: string) => {
+    try {
+      const { name, songIds } = await recommendationService.createVibePlaylist(
+        playlists,
+        vibe
+      );
+
+      if (songIds.length === 0) {
+        toast({
+          title: "Nenhuma música encontrada",
+          description:
+            "Não encontramos músicas nas suas playlists que combinem com essa vibe.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create the vibe playlist
+      const allSongs = playlists.flatMap((p) => p.songs);
+      const selectedSongs = allSongs.filter((s) => songIds.includes(s.id));
+
+      // Remove duplicates by ID
+      const uniqueSongs = Array.from(
+        new Map(selectedSongs.map((s) => [s.id, s])).values()
+      );
+
+      const newPlaylist = playlistService.create(
+        name ||
+          `Vibe: ${vibe.length > 20 ? vibe.substring(0, 20) + "..." : vibe}`,
+        `Playlist gerada por IA baseada na vibe: "${vibe}"`
+      );
+
+      // Mark as vibe playlist and set expiration
+      playlistService.update(newPlaylist.id, {
+        isVibe: true,
+        expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+      });
+
+      // Add songs
+      uniqueSongs.forEach((song) => {
+        playlistService.addSong(newPlaylist.id, song);
+      });
+
+      toast({
+        title: "Vibe criada!",
+        description: `${uniqueSongs.length} músicas adicionadas à sua vibe.`,
+      });
+
+      navigate(`/playlist/${newPlaylist.id}`);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Erro ao criar vibe",
+        description: "Ocorreu um erro ao processar sua solicitação.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -254,19 +315,30 @@ const Index = () => {
                     Recomendados para você
                   </h3>
                   {hasToken && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => loadRecommendations(playlists, true)}
-                      disabled={isLoadingRecommendations}
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 mr-2 ${
-                          isLoadingRecommendations ? "animate-spin" : ""
-                        }`}
-                      />
-                      Atualizar
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsVibeModalOpen(true)}
+                        className="gap-2"
+                      >
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Minha Vibe
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => loadRecommendations(playlists, true)}
+                        disabled={isLoadingRecommendations}
+                      >
+                        <RefreshCw
+                          className={`h-4 w-4 mr-2 ${
+                            isLoadingRecommendations ? "animate-spin" : ""
+                          }`}
+                        />
+                        Atualizar
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -332,6 +404,12 @@ const Index = () => {
       <VideoModal
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
+      />
+
+      <VibeModal
+        isOpen={isVibeModalOpen}
+        onClose={() => setIsVibeModalOpen(false)}
+        onSubmit={handleCreateVibe}
       />
     </div>
   );

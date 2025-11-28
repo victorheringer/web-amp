@@ -19,7 +19,17 @@ const savePlaylists = (playlists: Playlist[]) => {
 
 export const playlistService = {
   getAll: (): Playlist[] => {
-    return getPlaylists();
+    const playlists = getPlaylists();
+    const now = Date.now();
+    const validPlaylists = playlists.filter(
+      (p) => !p.expiresAt || p.expiresAt > now
+    );
+
+    if (validPlaylists.length !== playlists.length) {
+      savePlaylists(validPlaylists);
+    }
+
+    return validPlaylists;
   },
 
   getById: (id: string): Playlist | undefined => {
@@ -142,5 +152,24 @@ export const playlistService = {
       console.error("Error importing playlist:", error);
       return null;
     }
+  },
+
+  convertVibeToNormal: (id: string): Playlist | null => {
+    const playlists = getPlaylists();
+    const index = playlists.findIndex((p) => p.id === id);
+    if (index === -1) return null;
+
+    const playlist = playlists[index];
+    if (!playlist.isVibe) return playlist;
+
+    const { isVibe, expiresAt, ...rest } = playlist;
+    const updatedPlaylist = {
+      ...rest,
+      updatedAt: Date.now(),
+    };
+
+    playlists[index] = updatedPlaylist;
+    savePlaylists(playlists);
+    return updatedPlaylist;
   },
 };
