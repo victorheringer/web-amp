@@ -7,6 +7,7 @@ import { PlayerProvider } from "@/contexts/PlayerContext";
 import Index from "./pages/Index";
 import Playlist from "./pages/Playlist";
 import Settings from "./pages/Settings";
+import ImportPlaylist from "./pages/ImportPlaylist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/playlist/:id" element={<Playlist />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/import" element={<ImportPlaylist />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

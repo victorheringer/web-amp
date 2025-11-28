@@ -1,4 +1,4 @@
-import { Home, ListMusic, Plus, Settings } from "lucide-react";
+import { Home, ListMusic, Plus, Settings, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -58,6 +58,16 @@ const Sidebar = () => {
           <Link to="/">
             <Home className="mr-3 h-5 w-5" />
             Início
+          </Link>
+        </Button>
+        <Button
+          asChild
+          variant="ghost"
+          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <Link to="/import">
+            <Upload className="mr-3 h-5 w-5" />
+            Importar Playlist
           </Link>
         </Button>
         <Button

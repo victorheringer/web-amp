@@ -26,6 +26,7 @@ import {
   Settings,
   Trash2,
   Music,
+  Share2,
 } from "lucide-react";
 import { playlistService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
@@ -160,6 +161,42 @@ const Playlist = () => {
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao atualizar a playlist.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportPlaylist = () => {
+    if (!playlist) return;
+
+    try {
+      // Create a clean version of the playlist for export
+      const exportData = {
+        name: playlist.name,
+        description: playlist.description,
+        songs: playlist.songs.map((song: any) => ({
+          title: song.title,
+          artist: song.artist,
+          url: song.url,
+          thumbnail: song.thumbnail,
+          duration: song.duration,
+          provider: song.provider,
+        })),
+      };
+
+      const jsonString = JSON.stringify(exportData, null, 2);
+      navigator.clipboard.writeText(jsonString);
+
+      toast({
+        title: "Playlist copiada!",
+        description:
+          "O JSON da playlist foi copiado para a área de transferência.",
+      });
+    } catch (error) {
+      console.error("Erro ao exportar playlist:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível exportar a playlist.",
         variant: "destructive",
       });
     }
@@ -418,6 +455,15 @@ const Playlist = () => {
 
             <Button className="w-full" onClick={handleUpdatePlaylist}>
               Salvar Alterações
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleExportPlaylist}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Exportar Playlist (JSON)
             </Button>
 
             <div className="relative">
