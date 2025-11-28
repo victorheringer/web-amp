@@ -8,17 +8,22 @@ import {
   Volume2,
   VolumeX,
   Maximize2,
+  Activity,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayer } from "@/contexts/PlayerContext";
 import defaultImage from "@/assets/image.png";
+import { useState } from "react";
+import Visualizer from "./Visualizer";
 
 interface PlayerProps {
   onExpand: () => void;
 }
 
 const Player = ({ onExpand }: PlayerProps) => {
+  const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
   const {
     currentSong,
     isPlaying,
@@ -73,8 +78,32 @@ const Player = ({ onExpand }: PlayerProps) => {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-player border-t border-border backdrop-blur-lg">
-      <div className="px-4 py-3">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex flex-col shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+      {/* Visualizer Panel */}
+      <div
+        className={`w-full bg-black transition-all duration-500 ease-in-out overflow-hidden ${
+          isVisualizerOpen ? "h-[60vh] border-t border-white/10" : "h-0"
+        }`}
+      >
+        <div className="relative w-full h-full">
+          {isVisualizerOpen && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 text-white/70 hover:text-white hover:bg-white/10 z-20"
+                onClick={() => setIsVisualizerOpen(false)}
+              >
+                <ChevronDown className="h-6 w-6" />
+              </Button>
+              <Visualizer isPlaying={isPlaying} />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Player Controls Bar */}
+      <div className="bg-player border-t border-border backdrop-blur-lg px-4 py-3">
         {/* Progress bar */}
         <div className="mb-2">
           <div
@@ -201,6 +230,20 @@ const Player = ({ onExpand }: PlayerProps) => {
               onValueChange={(value) => setVolume(value[0])}
               disabled={!currentSong}
             />
+            <Button
+              size="icon"
+              variant="ghost"
+              className={`text-muted-foreground hover:text-primary ${
+                isVisualizerOpen ? "text-primary bg-primary/10" : ""
+              }`}
+              onClick={() => setIsVisualizerOpen(!isVisualizerOpen)}
+              disabled={!currentSong}
+              title={
+                isVisualizerOpen ? "Fechar Visualizador" : "Abrir Visualizador"
+              }
+            >
+              <Activity className="h-5 w-5" />
+            </Button>
             <Button
               size="icon"
               variant="ghost"
