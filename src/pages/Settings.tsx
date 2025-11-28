@@ -95,7 +95,7 @@ const Settings = () => {
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto pb-32">
         <div className="p-8">
           <div className="max-w-2xl mx-auto">
             <div className="mb-8">

@@ -260,7 +260,7 @@ const Playlist = () => {
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto pb-32">
         <div className="p-8">
           <div className="mb-8 flex items-center justify-between">
             <div>

@@ -62,18 +62,16 @@ const Player = ({ onExpand }: PlayerProps) => {
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  if (!currentSong) {
-    return null; // Don't show player if no song is loaded
-  }
-
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-player border-t border-border backdrop-blur-lg">
       <div className="px-4 py-3">
         {/* Progress bar */}
         <div className="mb-2">
           <div
-            className="h-1 bg-secondary rounded-full cursor-pointer group relative"
-            onClick={handleProgressClick}
+            className={`h-1 bg-secondary rounded-full relative ${
+              currentSong ? "cursor-pointer group" : "cursor-default"
+            }`}
+            onClick={currentSong ? handleProgressClick : undefined}
           >
             <div
               className="h-full bg-primary rounded-full transition-all group-hover:bg-primary/80"
@@ -89,22 +87,30 @@ const Player = ({ onExpand }: PlayerProps) => {
         <div className="flex items-center justify-between gap-4">
           {/* Current track info */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-14 h-14 bg-gradient-card rounded overflow-hidden flex-shrink-0">
-              <img
-                src={
-                  currentSong.thumbnail ||
-                  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"
-                }
-                alt={currentSong.title}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-14 h-14 bg-gradient-card rounded overflow-hidden flex-shrink-0 flex items-center justify-center bg-muted">
+              {currentSong ? (
+                <img
+                  src={
+                    currentSong.thumbnail ||
+                    "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"
+                  }
+                  alt={currentSong.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <span className="text-xs text-muted-foreground">WebAmp</span>
+                </div>
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="font-semibold text-sm truncate">
-                {currentSong.title}
+                {currentSong ? currentSong.title : "Nenhuma música selecionada"}
               </h4>
               <p className="text-xs text-muted-foreground truncate">
-                {currentSong.artist}
+                {currentSong
+                  ? currentSong.artist
+                  : "Escolha uma música para tocar"}
               </p>
             </div>
           </div>
@@ -118,6 +124,7 @@ const Player = ({ onExpand }: PlayerProps) => {
                 isShuffle ? "text-primary" : ""
               }`}
               onClick={toggleShuffle}
+              disabled={!currentSong}
             >
               <Shuffle className="h-4 w-4" />
             </Button>
@@ -126,6 +133,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               variant="ghost"
               className="text-foreground hover:text-white"
               onClick={playPrevious}
+              disabled={!currentSong}
             >
               <SkipBack className="h-5 w-5" />
             </Button>
@@ -133,6 +141,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               size="icon"
               className="h-10 w-10 bg-primary hover:bg-primary-glow rounded-full shadow-glow"
               onClick={handlePlayPause}
+              disabled={!currentSong}
             >
               {isPlaying ? (
                 <Pause className="h-5 w-5 fill-current" />
@@ -145,6 +154,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               variant="ghost"
               className="text-foreground hover:text-white"
               onClick={playNext}
+              disabled={!currentSong}
             >
               <SkipForward className="h-5 w-5" />
             </Button>
@@ -152,6 +162,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               size="icon"
               variant="ghost"
               className="text-muted-foreground hover:text-foreground"
+              disabled={!currentSong}
             >
               <Repeat className="h-4 w-4" />
             </Button>
@@ -164,6 +175,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               variant="ghost"
               className="text-muted-foreground hover:text-foreground"
               onClick={toggleMute}
+              disabled={!currentSong}
             >
               {isMuted || volume === 0 ? (
                 <VolumeX className="h-5 w-5" />
@@ -177,12 +189,14 @@ const Player = ({ onExpand }: PlayerProps) => {
               step={1}
               className="w-24"
               onValueChange={(value) => setVolume(value[0])}
+              disabled={!currentSong}
             />
             <Button
               size="icon"
               variant="ghost"
               className="text-muted-foreground hover:text-primary"
               onClick={onExpand}
+              disabled={!currentSong}
             >
               <Maximize2 className="h-5 w-5" />
             </Button>

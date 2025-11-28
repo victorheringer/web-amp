@@ -1,45 +1,23 @@
 {
-  "name": "Exemplo de Playlist",
+  "name": "Playlist Animada",
   "description": "",
   "songs": [
     {
-      "title": "Pitty - Máscara (Clipe Oficial)",
-      "artist": "Pitty",
-      "url": "https://www.youtube.com/embed/W4-G-itMgjI",
-      "thumbnail": "https://img.youtube.com/vi/W4-G-itMgjI/maxresdefault.jpg",
-      "duration": "4:59",
-      "provider": "youtube"
-    },
-    {
-      "title": "System Of A Down - Chop Suey! (Official HD Video)",
-      "artist": "System Of A Down",
-      "url": "https://www.youtube.com/embed/CSvFpBOe8eY",
-      "thumbnail": "https://img.youtube.com/vi/CSvFpBOe8eY/maxresdefault.jpg",
-      "duration": "3:29",
-      "provider": "youtube"
-    },
-    {
       "title": "Usher - Yeah! (Official Video) ft. Lil Jon, Ludacris",
-      "artist": "Usher",
+      "artist": "User",
       "url": "https://www.youtube.com/embed/GxBSyx85Kp8",
+      "originalUrl": "https://www.youtube.com/watch?v=GxBSyx85Kp8&list=RDGxBSyx85Kp8&start_radio=1",
       "thumbnail": "https://img.youtube.com/vi/GxBSyx85Kp8/maxresdefault.jpg",
       "duration": "4:13",
       "provider": "youtube"
     },
     {
-      "title": "Feira de Mangaio | Mariana Aydar + Felipe Cordeiro + Marcelo Jeneci",
-      "artist": "Mariana Aydar",
-      "url": "https://www.youtube.com/embed/fdPMm4-ZNaU",
-      "thumbnail": "https://img.youtube.com/vi/fdPMm4-ZNaU/maxresdefault.jpg",
-      "duration": "3:56",
-      "provider": "youtube"
-    },
-    {
-      "title": "Flo Rida - Low (feat. T-Pain) (Official Video)",
-      "artist": "Flo Rida",
-      "url": "https://www.youtube.com/embed/U2waT9TxPU0",
-      "thumbnail": "https://img.youtube.com/vi/U2waT9TxPU0/maxresdefault.jpg",
-      "duration": "3:51",
+      "title": "System Of A Down - Toxicity (Official HD Video)",
+      "artist": "System Of A Down",
+      "url": "https://www.youtube.com/embed/iywaBOMvYLI",
+      "originalUrl": "https://www.youtube.com/watch?v=iywaBOMvYLI&list=RDiywaBOMvYLI&start_radio=1",
+      "thumbnail": "https://img.youtube.com/vi/iywaBOMvYLI/maxresdefault.jpg",
+      "duration": "3:45",
       "provider": "youtube"
     }
   ]
