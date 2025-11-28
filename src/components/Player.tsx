@@ -26,6 +26,7 @@ const Player = ({ onExpand }: PlayerProps) => {
     volume,
     isMuted,
     isShuffle,
+    isRepeat,
     pause,
     resume,
     seekTo,
@@ -34,6 +35,7 @@ const Player = ({ onExpand }: PlayerProps) => {
     playNext,
     playPrevious,
     toggleShuffle,
+    toggleRepeat,
   } = usePlayer();
 
   const handlePlayPause = () => {
@@ -161,7 +163,10 @@ const Player = ({ onExpand }: PlayerProps) => {
             <Button
               size="icon"
               variant="ghost"
-              className="text-muted-foreground hover:text-foreground"
+              className={`text-muted-foreground hover:text-foreground ${
+                isRepeat ? "text-primary" : ""
+              }`}
+              onClick={toggleRepeat}
               disabled={!currentSong}
             >
               <Repeat className="h-4 w-4" />

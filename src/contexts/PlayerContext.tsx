@@ -17,6 +17,7 @@ interface PlayerContextType {
   volume: number;
   isMuted: boolean;
   isShuffle: boolean;
+  isRepeat: boolean;
   play: (song: Song, playlist?: Song[], playlistId?: string) => void;
   pause: () => void;
   resume: () => void;
@@ -27,6 +28,7 @@ interface PlayerContextType {
   playNext: () => void;
   playPrevious: () => void;
   toggleShuffle: () => void;
+  toggleRepeat: () => void;
   updateQueue: (newQueue: Song[]) => void;
 }
 
@@ -55,11 +57,13 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const [volume, setVolumeState] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
+  const [isRepeat, setIsRepeat] = useState(false);
   const [queue, setQueue] = useState<Song[]>([]);
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const progressIntervalRef = useRef<number | null>(null);
   const usageIntervalRef = useRef<number | null>(null);
+  const handleSongEndRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     // Cleanup on unmount
@@ -181,9 +185,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
             // YouTube player states: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (video cued)
             if (event.data === 0) {
               // Video ended
-              setIsPlaying(false);
-              setCurrentTime(0);
-              playNext();
+              handleSongEndRef.current();
             } else if (event.data === 1) {
               // Playing
               setIsPlaying(true);
@@ -339,6 +341,26 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     setIsShuffle(!isShuffle);
   };
 
+  const toggleRepeat = () => {
+    setIsRepeat(!isRepeat);
+  };
+
+  useEffect(() => {
+    handleSongEndRef.current = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      if (isRepeat) {
+        if (playerRef.current && playerRef.current.seekTo) {
+          playerRef.current.seekTo(0);
+          playerRef.current.playVideo();
+          setIsPlaying(true);
+        }
+      } else {
+        playNext();
+      }
+    };
+  }, [isRepeat, playNext]);
+
   const updateQueue = (newQueue: Song[]) => {
     setQueue(newQueue);
   };
@@ -354,6 +376,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
         volume,
         isMuted,
         isShuffle,
+        isRepeat,
         play,
         pause,
         resume,
@@ -364,6 +387,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
         playNext,
         playPrevious,
         toggleShuffle,
+        toggleRepeat,
         updateQueue,
       }}
     >
