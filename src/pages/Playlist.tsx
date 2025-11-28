@@ -50,7 +50,8 @@ const Playlist = () => {
   const [playlist, setPlaylist] = useState<any>(null);
   const [editingName, setEditingName] = useState("");
   const { toast } = useToast();
-  const { play, pause, resume, currentSong, isPlaying } = usePlayer();
+  const { play, pause, resume, currentSong, isPlaying, updateQueue } =
+    usePlayer();
 
   useEffect(() => {
     if (id) {
@@ -94,6 +95,15 @@ const Playlist = () => {
 
       if (updatedPlaylist) {
         setPlaylist(updatedPlaylist);
+
+        // Update queue if we are currently playing from this playlist
+        if (
+          currentSong &&
+          playlist?.songs.some((s: any) => s.id === currentSong.id)
+        ) {
+          updateQueue(updatedPlaylist.songs);
+        }
+
         toast({
           title: "Música adicionada",
           description: `"${songData.title}" foi adicionada à playlist.`,
@@ -124,6 +134,15 @@ const Playlist = () => {
 
       if (updatedPlaylist) {
         setPlaylist(updatedPlaylist);
+
+        // Update queue if we are currently playing from this playlist
+        if (
+          currentSong &&
+          playlist?.songs.some((s: any) => s.id === currentSong.id)
+        ) {
+          updateQueue(updatedPlaylist.songs);
+        }
+
         toast({
           title: "Música removida",
           description: `"${song?.title || "Música"}" foi removida da playlist.`,

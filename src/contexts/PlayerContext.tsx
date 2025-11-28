@@ -26,6 +26,7 @@ interface PlayerContextType {
   playNext: () => void;
   playPrevious: () => void;
   toggleShuffle: () => void;
+  updateQueue: (newQueue: Song[]) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -305,6 +306,10 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     setIsShuffle(!isShuffle);
   };
 
+  const updateQueue = (newQueue: Song[]) => {
+    setQueue(newQueue);
+  };
+
   return (
     <PlayerContext.Provider
       value={{
@@ -325,6 +330,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
         playNext,
         playPrevious,
         toggleShuffle,
+        updateQueue,
       }}
     >
       {children}
