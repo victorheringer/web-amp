@@ -34,7 +34,7 @@ const App = () => (
       <PlayerProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <AppContent />
         </BrowserRouter>
       </PlayerProvider>
