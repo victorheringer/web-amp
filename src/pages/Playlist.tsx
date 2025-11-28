@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import VideoModal from "@/components/VideoModal";
 import AddSongModal from "@/components/AddSongModal";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -34,12 +36,16 @@ const Playlist = () => {
   const [isAddSongModalOpen, setIsAddSongModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [playlist, setPlaylist] = useState<any>(null);
+  const [editingName, setEditingName] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     if (id) {
       const foundPlaylist = playlistService.getById(id);
       setPlaylist(foundPlaylist);
+      if (foundPlaylist) {
+        setEditingName(foundPlaylist.name);
+      }
     }
   }, [id]);
 
@@ -114,6 +120,36 @@ const Playlist = () => {
       toast({
         title: "Erro",
         description: "Não foi possível remover a música.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdatePlaylist = () => {
+    if (!id || !editingName.trim()) return;
+
+    try {
+      const updatedPlaylist = playlistService.update(id, { name: editingName });
+
+      if (updatedPlaylist) {
+        setPlaylist(updatedPlaylist);
+        toast({
+          title: "Playlist atualizada",
+          description: "O nome da playlist foi atualizado com sucesso.",
+        });
+        setIsSettingsModalOpen(false);
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível atualizar a playlist.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar playlist:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao atualizar a playlist.",
         variant: "destructive",
       });
     }
@@ -299,7 +335,32 @@ const Playlist = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4">
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome da Playlist</Label>
+              <Input
+                id="name"
+                value={editingName}
+                onChange={(e) => setEditingName(e.target.value)}
+                placeholder="Nome da playlist"
+              />
+            </div>
+
+            <Button className="w-full" onClick={handleUpdatePlaylist}>
+              Salvar Alterações
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Zona de Perigo
+                </span>
+              </div>
+            </div>
+
             <Button
               variant="destructive"
               className="w-full"
