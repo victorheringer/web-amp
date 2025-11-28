@@ -38,6 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import defaultImage from "@/assets/image.png";
 
 const Playlist = () => {
   const { id } = useParams();
@@ -398,10 +399,7 @@ const Playlist = () => {
                   >
                     <div className="relative w-16 h-16 flex-shrink-0">
                       <img
-                        src={
-                          song.thumbnail ||
-                          "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"
-                        }
+                        src={song.thumbnail || defaultImage}
                         alt={song.title}
                         className="w-full h-full object-cover rounded"
                       />

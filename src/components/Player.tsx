@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayer } from "@/contexts/PlayerContext";
+import defaultImage from "@/assets/image.png";
 
 interface PlayerProps {
   onExpand: () => void;
@@ -99,10 +100,7 @@ const Player = ({ onExpand }: PlayerProps) => {
             <div className="w-14 h-14 bg-gradient-card rounded overflow-hidden flex-shrink-0 flex items-center justify-center bg-muted">
               {currentSong ? (
                 <img
-                  src={
-                    currentSong.thumbnail ||
-                    "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"
-                  }
+                  src={currentSong.thumbnail || defaultImage}
                   alt={currentSong.title}
                   className="w-full h-full object-cover"
                 />

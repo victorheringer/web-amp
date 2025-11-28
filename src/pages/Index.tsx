@@ -36,6 +36,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import type { Song, Playlist } from "@/services/types";
+import defaultImage from "@/assets/image.png";
 
 const Index = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
@@ -280,16 +281,12 @@ const Index = () => {
                         onClick={() => navigate(`/playlist/${playlist.id}`)}
                       >
                         <div className="flex items-center gap-4">
-                          <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                            {playlist.songs[0]?.thumbnail ? (
-                              <img
-                                src={playlist.songs[0].thumbnail}
-                                alt={playlist.name}
-                                className="h-full w-full object-cover rounded-md"
-                              />
-                            ) : (
-                              <Music className="h-8 w-8 text-muted-foreground" />
-                            )}
+                          <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <img
+                              src={playlist.songs[0]?.thumbnail || defaultImage}
+                              alt={playlist.name}
+                              className="h-full w-full object-cover"
+                            />
                           </div>
                           <div className="min-w-0">
                             <h4 className="font-semibold truncate group-hover:text-primary transition-colors">

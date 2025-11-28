@@ -10,6 +10,7 @@ import {
 import { Song } from "@/services";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useToast } from "@/hooks/use-toast";
+import defaultImage from "@/assets/image.png";
 
 interface VideoCardProps {
   song: Song;
@@ -71,10 +72,7 @@ const VideoCard = ({
         onClick={handlePlay}
       >
         <img
-          src={
-            song.thumbnail ||
-            "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"
-          }
+          src={song.thumbnail || defaultImage}
           alt={song.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
