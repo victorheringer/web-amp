@@ -20,6 +20,8 @@ import {
   LayoutGrid,
   List,
   Play,
+  Pause,
+  MoreVertical,
   Plus,
   Settings,
   Trash2,
@@ -27,6 +29,13 @@ import {
 } from "lucide-react";
 import { playlistService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
+import { usePlayer } from "@/contexts/PlayerContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Playlist = () => {
   const { id } = useParams();
@@ -38,6 +47,7 @@ const Playlist = () => {
   const [playlist, setPlaylist] = useState<any>(null);
   const [editingName, setEditingName] = useState("");
   const { toast } = useToast();
+  const { play, pause, resume, currentSong, isPlaying } = usePlayer();
 
   useEffect(() => {
     if (id) {
@@ -267,47 +277,107 @@ const Playlist = () => {
             </div>
           ) : (
             <div className="space-y-2">
-              {songs.map((song) => (
-                <div
-                  key={song.id}
-                  className="flex items-center gap-4 p-3 rounded-lg bg-card hover:bg-card/80 transition-colors group cursor-pointer"
-                  onClick={() => setSelectedVideo(song.url)}
-                >
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-10 w-10 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedVideo(song.url);
-                    }}
-                  >
-                    <Play className="h-5 w-5 fill-current" />
-                  </Button>
+              {songs.map((song) => {
+                const isCurrentSong = currentSong?.id === song.id;
 
-                  <img
-                    src={
-                      song.thumbnail ||
-                      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"
+                const handlePlay = (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  if (isCurrentSong) {
+                    if (isPlaying) {
+                      pause();
+                    } else {
+                      resume();
                     }
-                    alt={song.title}
-                    className="w-16 h-16 object-cover rounded"
-                  />
+                  } else {
+                    play(song);
+                  }
+                };
 
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm truncate">
-                      {song.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {song.artist}
-                    </p>
-                  </div>
+                return (
+                  <div
+                    key={song.id}
+                    className={`flex items-center gap-4 p-3 rounded-lg transition-colors group cursor-pointer ${
+                      isCurrentSong
+                        ? "bg-primary/10"
+                        : "bg-card hover:bg-card/80"
+                    }`}
+                    onClick={handlePlay}
+                  >
+                    <div className="relative w-16 h-16 flex-shrink-0">
+                      <img
+                        src={
+                          song.thumbnail ||
+                          "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"
+                        }
+                        alt={song.title}
+                        className="w-full h-full object-cover rounded"
+                      />
+                      <div
+                        className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity rounded ${
+                          isCurrentSong && isPlaying
+                            ? "opacity-100"
+                            : "opacity-0 group-hover:opacity-100"
+                        }`}
+                      >
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-white hover:text-white hover:bg-white/20 rounded-full"
+                          onClick={handlePlay}
+                        >
+                          {isCurrentSong && isPlaying ? (
+                            <Pause className="h-4 w-4 fill-current" />
+                          ) : (
+                            <Play className="h-4 w-4 fill-current" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
 
-                  <div className="text-sm text-muted-foreground">
-                    {song.duration || "0:00"}
+                    <div className="flex-1 min-w-0">
+                      <h3
+                        className={`font-semibold text-sm truncate ${
+                          isCurrentSong ? "text-primary" : ""
+                        }`}
+                      >
+                        {song.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {song.artist}
+                      </p>
+                    </div>
+
+                    <div className="text-sm text-muted-foreground mr-2">
+                      {song.duration || "0:00"}
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveSong(song.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remover da playlist
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
