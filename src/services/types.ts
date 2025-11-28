@@ -24,9 +24,18 @@ export interface Playlist {
   expiresAt?: number;
 }
 
+export interface KeyboardShortcuts {
+  playPause: string;
+  next: string;
+  previous: string;
+  shuffle: string;
+  repeat: string;
+}
+
 export interface AppSettings {
   token?: string;
   theme?: "light" | "dark" | "system";
   viewMode?: "grid" | "list";
   searchProvider?: "youtube";
+  shortcuts?: KeyboardShortcuts;
 }

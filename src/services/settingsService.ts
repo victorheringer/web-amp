@@ -1,15 +1,27 @@
-import { AppSettings } from "./types";
+import { AppSettings, KeyboardShortcuts } from "./types";
 
 const SETTINGS_STORAGE_KEY = "web-amp-settings";
 
+const DEFAULT_SHORTCUTS: KeyboardShortcuts = {
+  playPause: " ",
+  next: "ArrowRight",
+  previous: "ArrowLeft",
+  shuffle: "a",
+  repeat: "r",
+};
+
 const getSettings = (): AppSettings => {
   const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
-  if (!stored) return {};
+  if (!stored) return { shortcuts: DEFAULT_SHORTCUTS };
   try {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    return {
+      ...parsed,
+      shortcuts: { ...DEFAULT_SHORTCUTS, ...parsed.shortcuts },
+    };
   } catch (error) {
     console.error("Failed to parse settings from localStorage", error);
-    return {};
+    return { shortcuts: DEFAULT_SHORTCUTS };
   }
 };
 
@@ -58,6 +70,17 @@ export const settingsService = {
   setSearchProvider: (provider: "youtube"): void => {
     const settings = getSettings();
     settings.searchProvider = provider;
+    saveSettings(settings);
+  },
+
+  getShortcuts: (): KeyboardShortcuts => {
+    const settings = getSettings();
+    return settings.shortcuts || DEFAULT_SHORTCUTS;
+  },
+
+  setShortcuts: (shortcuts: KeyboardShortcuts): void => {
+    const settings = getSettings();
+    settings.shortcuts = shortcuts;
     saveSettings(settings);
   },
 

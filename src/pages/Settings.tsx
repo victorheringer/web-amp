@@ -21,13 +21,17 @@ import {
 } from "@/components/ui/select";
 import { settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Trash2, LayoutGrid, List, Search } from "lucide-react";
+import { Save, Trash2, LayoutGrid, List, Search, Keyboard } from "lucide-react";
 import VideoModal from "@/components/VideoModal";
+import { KeyboardShortcuts } from "@/services/types";
 
 const Settings = () => {
   const [token, setToken] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchProvider, setSearchProvider] = useState<"youtube">("youtube");
+  const [shortcuts, setShortcuts] = useState<KeyboardShortcuts>(
+    settingsService.getShortcuts()
+  );
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -42,6 +46,7 @@ const Settings = () => {
     if (settings.searchProvider) {
       setSearchProvider(settings.searchProvider);
     }
+    setShortcuts(settingsService.getShortcuts());
   }, []);
 
   const handleSaveToken = () => {
@@ -88,6 +93,19 @@ const Settings = () => {
       description: `O provedor de busca foi alterado para ${
         value === "youtube" ? "YouTube" : value
       }.`,
+    });
+  };
+
+  const handleShortcutChange = (
+    key: keyof KeyboardShortcuts,
+    value: string
+  ) => {
+    const newShortcuts = { ...shortcuts, [key]: value };
+    setShortcuts(newShortcuts);
+    settingsService.setShortcuts(newShortcuts);
+    toast({
+      title: "Atalho atualizado",
+      description: "O atalho foi salvo com sucesso.",
     });
   };
 
@@ -226,6 +244,77 @@ const Settings = () => {
                         Remover Token
                       </Button>
                     )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Keyboard className="h-5 w-5" />
+                    Atalhos de Teclado
+                  </CardTitle>
+                  <CardDescription>
+                    Personalize as teclas de atalho para controlar o player.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="playPause">Play / Pause</Label>
+                      <Input
+                        id="playPause"
+                        value={shortcuts.playPause}
+                        onChange={(e) =>
+                          handleShortcutChange("playPause", e.target.value)
+                        }
+                        className="bg-input border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="next">Próxima Música</Label>
+                      <Input
+                        id="next"
+                        value={shortcuts.next}
+                        onChange={(e) =>
+                          handleShortcutChange("next", e.target.value)
+                        }
+                        className="bg-input border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="previous">Música Anterior</Label>
+                      <Input
+                        id="previous"
+                        value={shortcuts.previous}
+                        onChange={(e) =>
+                          handleShortcutChange("previous", e.target.value)
+                        }
+                        className="bg-input border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shuffle">Aleatório (Shuffle)</Label>
+                      <Input
+                        id="shuffle"
+                        value={shortcuts.shuffle}
+                        onChange={(e) =>
+                          handleShortcutChange("shuffle", e.target.value)
+                        }
+                        className="bg-input border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="repeat">Repetir</Label>
+                      <Input
+                        id="repeat"
+                        value={shortcuts.repeat}
+                        onChange={(e) =>
+                          handleShortcutChange("repeat", e.target.value)
+                        }
+                        className="bg-input border-border"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
