@@ -1,5 +1,6 @@
 import {
   Play,
+  Pause,
   SkipBack,
   SkipForward,
   Repeat,
@@ -9,21 +10,62 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { usePlayer } from "@/contexts/PlayerContext";
 
 interface PlayerProps {
   onExpand: () => void;
 }
 
 const Player = ({ onExpand }: PlayerProps) => {
+  const { currentSong, isPlaying, currentTime, duration, pause, resume, seekTo } = usePlayer();
+
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      pause();
+    } else {
+      resume();
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percentage = clickX / rect.width;
+    const newTime = percentage * duration;
+    seekTo(newTime);
+  };
+
+  const formatTime = (seconds: number): string => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  if (!currentSong) {
+    return null; // Don't show player if no song is loaded
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-player border-t border-border backdrop-blur-lg">
       <div className="px-4 py-3">
         {/* Progress bar */}
         <div className="mb-2">
-          <Slider defaultValue={[33]} max={100} step={1} className="w-full" />
+          <div
+            className="h-1 bg-secondary rounded-full cursor-pointer group relative"
+            onClick={handleProgressClick}
+          >
+            <div
+              className="h-full bg-primary rounded-full transition-all group-hover:bg-primary/80"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>2:34</span>
-            <span>4:12</span>
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
           </div>
         </div>
 
@@ -32,14 +74,14 @@ const Player = ({ onExpand }: PlayerProps) => {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-14 h-14 bg-gradient-card rounded overflow-hidden flex-shrink-0">
               <img
-                src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"
-                alt="Album cover"
+                src={currentSong.thumbnail || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"}
+                alt={currentSong.title}
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="min-w-0 flex-1">
-              <h4 className="font-semibold text-sm truncate">Nome da Música</h4>
-              <p className="text-xs text-muted-foreground truncate">Artista</p>
+              <h4 className="font-semibold text-sm truncate">{currentSong.title}</h4>
+              <p className="text-xs text-muted-foreground truncate">{currentSong.artist}</p>
             </div>
           </div>
 
@@ -62,8 +104,13 @@ const Player = ({ onExpand }: PlayerProps) => {
             <Button
               size="icon"
               className="h-10 w-10 bg-primary hover:bg-primary-glow rounded-full shadow-glow"
+              onClick={handlePlayPause}
             >
-              <Play className="h-5 w-5 fill-current" />
+              {isPlaying ? (
+                <Pause className="h-5 w-5 fill-current" />
+              ) : (
+                <Play className="h-5 w-5 fill-current" />
+              )}
             </Button>
             <Button
               size="icon"

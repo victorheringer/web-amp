@@ -122,14 +122,7 @@ const Playlist = () => {
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {songs.map((song) => (
-                <VideoCard
-                  key={song.id}
-                  title={song.title}
-                  artist={song.artist}
-                  thumbnail={song.thumbnail || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=225&fit=crop"}
-                  duration={song.duration || "0:00"}
-                  onPlay={() => setSelectedVideo(song.url)}
-                />
+                <VideoCard key={song.id} song={song} />
               ))}
             </div>
           ) : (
