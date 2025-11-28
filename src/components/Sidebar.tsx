@@ -6,6 +6,8 @@ import {
   Upload,
   Sparkles,
   Volume2,
+  Search,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -88,6 +90,20 @@ const Sidebar = () => {
           asChild
           variant="ghost"
           className={`w-full justify-start ${
+            location.pathname === "/search"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          }`}
+        >
+          <Link to="/search">
+            <Search className="mr-3 h-5 w-5" />
+            Buscar
+          </Link>
+        </Button>
+        <Button
+          asChild
+          variant="ghost"
+          className={`w-full justify-start ${
             location.pathname === "/import"
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -114,7 +130,7 @@ const Sidebar = () => {
         </Button>
       </nav>
 
-      <div className="mt-6 px-3 flex-1 flex flex-col gap-2">
+      <div className="mt-4 px-3 flex-1 flex flex-col gap-2">
         {vibePlaylists.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2 px-2">
