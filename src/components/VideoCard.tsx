@@ -42,7 +42,10 @@ const VideoCard = ({ song, playlist, onRemove }: VideoCardProps) => {
 
   return (
     <Card className="group relative bg-card hover:bg-card/80 transition-all duration-300 overflow-hidden border-border cursor-pointer">
-      <div className="relative aspect-video overflow-hidden">
+      <div
+        className="relative aspect-video overflow-hidden"
+        onClick={handlePlay}
+      >
         <img
           src={
             song.thumbnail ||
