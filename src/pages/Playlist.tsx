@@ -28,6 +28,7 @@ import {
   Music,
   Share2,
   Sparkles,
+  GripVertical,
 } from "lucide-react";
 import { playlistService, settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import defaultImage from "@/assets/image.png";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const Playlist = () => {
   const { id } = useParams();
@@ -52,8 +54,15 @@ const Playlist = () => {
   const [playlist, setPlaylist] = useState<any>(null);
   const [editingName, setEditingName] = useState("");
   const { toast } = useToast();
-  const { play, pause, resume, currentSong, isPlaying, updateQueue } =
-    usePlayer();
+  const {
+    play,
+    pause,
+    resume,
+    currentSong,
+    isPlaying,
+    updateQueue,
+    currentPlaylistId,
+  } = usePlayer();
 
   useEffect(() => {
     if (id) {
@@ -268,6 +277,25 @@ const Playlist = () => {
     }
   };
 
+  const handleOnDragEnd = (result: any) => {
+    if (!result.destination || !id || !playlist) return;
+
+    const items = Array.from(playlist.songs);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Optimistic update
+    setPlaylist({ ...playlist, songs: items });
+
+    // Persist changes
+    playlistService.reorderSongs(id, items as any[]);
+
+    // Update player queue if this is the current playlist
+    if (currentPlaylistId === id) {
+      updateQueue(items as any[]);
+    }
+  };
+
   const songs = playlist?.songs || [];
 
   return (
@@ -370,123 +398,151 @@ const Playlist = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-2">
-              {songs.map((song) => {
-                const isCurrentSong = currentSong?.id === song.id;
-
-                const handlePlay = (e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  if (isCurrentSong) {
-                    if (isPlaying) {
-                      pause();
-                    } else {
-                      resume();
-                    }
-                  } else {
-                    play(song, songs, id);
-                  }
-                };
-
-                return (
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+              <Droppable droppableId="songs">
+                {(provided) => (
                   <div
-                    key={song.id}
-                    className={`flex items-center gap-4 p-3 rounded-lg transition-colors group cursor-pointer ${
-                      isCurrentSong
-                        ? "bg-primary/10"
-                        : "bg-card hover:bg-card/80"
-                    }`}
-                    onClick={handlePlay}
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="space-y-2"
                   >
-                    <div className="relative w-16 h-16 flex-shrink-0">
-                      <img
-                        src={song.thumbnail || defaultImage}
-                        alt={song.title}
-                        className="w-full h-full object-cover rounded"
-                      />
-                      <div
-                        className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity rounded ${
-                          isCurrentSong && isPlaying
-                            ? "opacity-100"
-                            : "opacity-0 group-hover:opacity-100"
-                        }`}
-                      >
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-white hover:text-white hover:bg-white/20 rounded-full"
-                          onClick={handlePlay}
+                    {songs.map((song: any, index: number) => {
+                      const isCurrentSong = currentSong?.id === song.id;
+
+                      const handlePlay = (e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        if (isCurrentSong) {
+                          if (isPlaying) {
+                            pause();
+                          } else {
+                            resume();
+                          }
+                        } else {
+                          play(song, songs, id);
+                        }
+                      };
+
+                      return (
+                        <Draggable
+                          key={song.id}
+                          draggableId={song.id}
+                          index={index}
                         >
-                          {isCurrentSong && isPlaying ? (
-                            <Pause className="h-4 w-4 fill-current" />
-                          ) : (
-                            <Play className="h-4 w-4 fill-current" />
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`flex items-center gap-4 p-3 rounded-lg transition-colors group ${
+                                isCurrentSong
+                                  ? "bg-primary/10"
+                                  : "bg-card hover:bg-card/80"
+                              }`}
+                              onClick={handlePlay}
+                            >
+                              <div
+                                {...provided.dragHandleProps}
+                                className="cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <GripVertical className="h-5 w-5" />
+                              </div>
+
+                              <div className="relative w-16 h-16 flex-shrink-0 cursor-pointer">
+                                <img
+                                  src={song.thumbnail || defaultImage}
+                                  alt={song.title}
+                                  className="w-full h-full object-cover rounded"
+                                />
+                                <div
+                                  className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity rounded ${
+                                    isCurrentSong && isPlaying
+                                      ? "opacity-100"
+                                      : "opacity-0 group-hover:opacity-100"
+                                  }`}
+                                >
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-white hover:text-white hover:bg-white/20 rounded-full"
+                                    onClick={handlePlay}
+                                  >
+                                    {isCurrentSong && isPlaying ? (
+                                      <Pause className="h-4 w-4 fill-current" />
+                                    ) : (
+                                      <Play className="h-4 w-4 fill-current" />
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="flex-1 min-w-0 cursor-pointer">
+                                <h3
+                                  className={`font-semibold text-sm truncate ${
+                                    isCurrentSong ? "text-primary" : ""
+                                  }`}
+                                >
+                                  {song.title}
+                                </h3>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {song.artist}
+                                </p>
+                              </div>
+
+                              <div className="text-sm text-muted-foreground mr-2">
+                                {song.duration || "0:00"}
+                              </div>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(
+                                        song.originalUrl || song.url
+                                      );
+                                      toast({
+                                        title: "Link copiado!",
+                                        description:
+                                          "O link da música foi copiado para a área de transferência.",
+                                      });
+                                    }}
+                                  >
+                                    <Share2 className="h-4 w-4 mr-2" />
+                                    Compartilhar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveSong(song.id);
+                                    }}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Remover da Playlist
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           )}
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h3
-                        className={`font-semibold text-sm truncate ${
-                          isCurrentSong ? "text-primary" : ""
-                        }`}
-                      >
-                        {song.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {song.artist}
-                      </p>
-                    </div>
-
-                    <div className="text-sm text-muted-foreground mr-2">
-                      {song.duration || "0:00"}
-                    </div>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          className="cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigator.clipboard.writeText(
-                              song.originalUrl || song.url
-                            );
-                            toast({
-                              title: "Link copiado!",
-                              description:
-                                "O link da música foi copiado para a área de transferência.",
-                            });
-                          }}
-                        >
-                          <Share2 className="h-4 w-4 mr-2" />
-                          Compartilhar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-white focus:bg-destructive cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveSong(song.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Remover da playlist
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
                   </div>
-                );
-              })}
-            </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           )}
         </div>
       </main>

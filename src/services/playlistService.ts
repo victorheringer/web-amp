@@ -112,6 +112,17 @@ export const playlistService = {
     return playlists[index];
   },
 
+  reorderSongs: (playlistId: string, newSongs: Song[]): Playlist | null => {
+    const playlists = getPlaylists();
+    const index = playlists.findIndex((p) => p.id === playlistId);
+    if (index === -1) return null;
+
+    playlists[index].songs = newSongs;
+    playlists[index].updatedAt = Date.now();
+    savePlaylists(playlists);
+    return playlists[index];
+  },
+
   importPlaylist: (data: any): Playlist | null => {
     try {
       // Basic validation
