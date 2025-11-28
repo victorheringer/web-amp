@@ -45,7 +45,7 @@ const Sidebar = () => {
     <aside className="w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
       <div className="p-6">
         <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          MusicStream
+          WebAmp
         </h1>
       </div>
 

@@ -13,12 +13,16 @@ interface PlayerContextType {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  volume: number;
+  isMuted: boolean;
   isShuffle: boolean;
   play: (song: Song, playlist?: Song[]) => void;
   pause: () => void;
   resume: () => void;
   stop: () => void;
   seekTo: (seconds: number) => void;
+  setVolume: (volume: number) => void;
+  toggleMute: () => void;
   playNext: () => void;
   playPrevious: () => void;
   toggleShuffle: () => void;
@@ -43,6 +47,8 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolumeState] = useState(100);
+  const [isMuted, setIsMuted] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [queue, setQueue] = useState<Song[]>([]);
   const playerRef = useRef<any>(null);
@@ -132,6 +138,14 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
             const videoDuration = event.target.getDuration();
             setDuration(videoDuration);
             setCurrentTime(0);
+
+            // Set initial volume
+            if (isMuted) {
+              event.target.mute();
+            } else {
+              event.target.setVolume(volume);
+            }
+
             resolve(event.target);
           },
           onStateChange: (event: any) => {
@@ -216,6 +230,33 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     }
   };
 
+  const setVolume = (newVolume: number) => {
+    setVolumeState(newVolume);
+    if (playerRef.current && playerRef.current.setVolume) {
+      playerRef.current.setVolume(newVolume);
+    }
+    if (newVolume > 0 && isMuted) {
+      setIsMuted(false);
+      if (playerRef.current && playerRef.current.unMute) {
+        playerRef.current.unMute();
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    if (playerRef.current) {
+      if (newMutedState) {
+        if (playerRef.current.mute) playerRef.current.mute();
+      } else {
+        if (playerRef.current.unMute) playerRef.current.unMute();
+        // Ensure volume is restored
+        if (playerRef.current.setVolume) playerRef.current.setVolume(volume);
+      }
+    }
+  };
+
   const playNext = () => {
     if (!currentSong || queue.length === 0) return;
 
@@ -271,12 +312,16 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
         isPlaying,
         currentTime,
         duration,
+        volume,
+        isMuted,
         isShuffle,
         play,
         pause,
         resume,
         stop,
         seekTo,
+        setVolume,
+        toggleMute,
         playNext,
         playPrevious,
         toggleShuffle,

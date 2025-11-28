@@ -6,6 +6,7 @@ import {
   Repeat,
   Shuffle,
   Volume2,
+  VolumeX,
   Maximize2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,10 +23,14 @@ const Player = ({ onExpand }: PlayerProps) => {
     isPlaying,
     currentTime,
     duration,
+    volume,
+    isMuted,
     isShuffle,
     pause,
     resume,
     seekTo,
+    setVolume,
+    toggleMute,
     playNext,
     playPrevious,
     toggleShuffle,
@@ -158,10 +163,21 @@ const Player = ({ onExpand }: PlayerProps) => {
               size="icon"
               variant="ghost"
               className="text-muted-foreground hover:text-foreground"
+              onClick={toggleMute}
             >
-              <Volume2 className="h-5 w-5" />
+              {isMuted || volume === 0 ? (
+                <VolumeX className="h-5 w-5" />
+              ) : (
+                <Volume2 className="h-5 w-5" />
+              )}
             </Button>
-            <Slider defaultValue={[70]} max={100} step={1} className="w-24" />
+            <Slider
+              value={[isMuted ? 0 : volume]}
+              max={100}
+              step={1}
+              className="w-24"
+              onValueChange={(value) => setVolume(value[0])}
+            />
             <Button
               size="icon"
               variant="ghost"
