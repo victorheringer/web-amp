@@ -213,7 +213,7 @@ const Index = () => {
                     </div>
                     <h3 className="font-semibold mb-2">IA Inteligente</h3>
                     <p className="text-sm text-muted-foreground">
-                      Sugestões personalizadas baseadas no seu gosto (Em breve).
+                      Sugestões personalizadas baseadas no seu gosto.
                     </p>
                   </div>
                 </div>
