@@ -55,6 +55,13 @@ const Player = ({ onExpand }: PlayerProps) => {
     seekTo(newTime);
   };
 
+  const handleExpand = () => {
+    if (isPlaying) {
+      pause();
+    }
+    onExpand();
+  };
+
   const formatTime = (seconds: number): string => {
     if (!seconds || isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -200,7 +207,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               size="icon"
               variant="ghost"
               className="text-muted-foreground hover:text-primary"
-              onClick={onExpand}
+              onClick={handleExpand}
               disabled={!currentSong}
             >
               <Maximize2 className="h-5 w-5" />
