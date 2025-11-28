@@ -12,7 +12,8 @@ interface VideoModalProps {
 
 const VideoModal = ({ isOpen, onClose }: VideoModalProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { currentSong, currentTime, seekTo, resume } = usePlayer();
+  const { currentSong, currentTime, seekTo, resume, volume, isMuted } =
+    usePlayer();
   const playerRef = useRef<any>(null);
   const [containerDiv, setContainerDiv] = useState<HTMLDivElement | null>(null);
 
@@ -40,6 +41,13 @@ const VideoModal = ({ isOpen, onClose }: VideoModalProps) => {
             rel: 0,
           },
           events: {
+            onReady: (event: any) => {
+              if (isMuted) {
+                event.target.mute();
+              } else {
+                event.target.setVolume(volume);
+              }
+            },
             onStateChange: (event: any) => {
               // 0 = ended
               if (event.data === 0) {
