@@ -12,10 +12,11 @@ import { usePlayer } from "@/contexts/PlayerContext";
 
 interface VideoCardProps {
   song: Song;
+  playlist?: Song[];
   onRemove?: (songId: string) => void;
 }
 
-const VideoCard = ({ song, onRemove }: VideoCardProps) => {
+const VideoCard = ({ song, playlist, onRemove }: VideoCardProps) => {
   const { play, pause, resume, currentSong, isPlaying } = usePlayer();
   const isCurrentSong = currentSong?.id === song.id;
 
@@ -28,7 +29,7 @@ const VideoCard = ({ song, onRemove }: VideoCardProps) => {
         resume();
       }
     } else {
-      play(song);
+      play(song, playlist);
     }
   };
 

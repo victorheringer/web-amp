@@ -308,6 +308,7 @@ const Playlist = () => {
                 <VideoCard
                   key={song.id}
                   song={song}
+                  playlist={songs}
                   onRemove={handleRemoveSong}
                 />
               ))}
@@ -326,7 +327,7 @@ const Playlist = () => {
                       resume();
                     }
                   } else {
-                    play(song);
+                    play(song, songs);
                   }
                 };
 

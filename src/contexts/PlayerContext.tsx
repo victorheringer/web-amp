@@ -1,17 +1,27 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
-import { Song, VideoProvider } from '@/services';
-import { extractYouTubeVideoId } from '@/lib/videoUtils';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
+import { Song, VideoProvider } from "@/services";
+import { extractYouTubeVideoId } from "@/lib/videoUtils";
 
 interface PlayerContextType {
   currentSong: Song | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
-  play: (song: Song) => void;
+  isShuffle: boolean;
+  play: (song: Song, playlist?: Song[]) => void;
   pause: () => void;
   resume: () => void;
   stop: () => void;
   seekTo: (seconds: number) => void;
+  playNext: () => void;
+  playPrevious: () => void;
+  toggleShuffle: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -19,7 +29,7 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 export const usePlayer = () => {
   const context = useContext(PlayerContext);
   if (!context) {
-    throw new Error('usePlayer must be used within PlayerProvider');
+    throw new Error("usePlayer must be used within PlayerProvider");
   }
   return context;
 };
@@ -33,6 +43,8 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [queue, setQueue] = useState<Song[]>([]);
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const progressIntervalRef = useRef<number | null>(null);
@@ -76,20 +88,20 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const createYouTubePlayer = (videoId: string) => {
     return new Promise((resolve, reject) => {
       if (!window.YT || !window.YT.Player) {
-        reject(new Error('YouTube API not loaded'));
+        reject(new Error("YouTube API not loaded"));
         return;
       }
 
       // Create hidden container if it doesn't exist
       if (!playerContainerRef.current) {
-        const container = document.createElement('div');
-        container.id = 'hidden-audio-player';
-        container.style.position = 'fixed';
-        container.style.top = '-9999px';
-        container.style.left = '-9999px';
-        container.style.width = '0';
-        container.style.height = '0';
-        container.style.visibility = 'hidden';
+        const container = document.createElement("div");
+        container.id = "hidden-audio-player";
+        container.style.position = "fixed";
+        container.style.top = "-9999px";
+        container.style.left = "-9999px";
+        container.style.width = "0";
+        container.style.height = "0";
+        container.style.visibility = "hidden";
         document.body.appendChild(container);
         playerContainerRef.current = container;
       }
@@ -101,8 +113,8 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
 
       // Create new player
       playerRef.current = new window.YT.Player(playerContainerRef.current, {
-        height: '0',
-        width: '0',
+        height: "0",
+        width: "0",
         videoId: videoId,
         playerVars: {
           autoplay: 1,
@@ -128,6 +140,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
               // Video ended
               setIsPlaying(false);
               setCurrentTime(0);
+              playNext();
             } else if (event.data === 1) {
               // Playing
               setIsPlaying(true);
@@ -137,35 +150,39 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
             }
           },
           onError: (event: any) => {
-            console.error('Player error:', event);
+            console.error("Player error:", event);
             setIsPlaying(false);
-            reject(new Error('Player error'));
+            reject(new Error("Player error"));
           },
         },
       });
     });
   };
 
-  const play = async (song: Song) => {
+  const play = async (song: Song, playlist?: Song[]) => {
     try {
+      if (playlist) {
+        setQueue(playlist);
+      }
+
       setCurrentSong(song);
       setCurrentTime(0);
       setDuration(0);
 
-      if (song.provider === 'youtube') {
+      if (song.provider === "youtube") {
         const videoId = extractYouTubeVideoId(song.url);
         if (!videoId) {
-          console.error('Invalid YouTube URL');
+          console.error("Invalid YouTube URL");
           return;
         }
 
         await createYouTubePlayer(videoId);
-      } else if (song.provider === 'soundcloud') {
+      } else if (song.provider === "soundcloud") {
         // TODO: Implement SoundCloud player
-        console.log('SoundCloud playback not implemented yet');
+        console.log("SoundCloud playback not implemented yet");
       }
     } catch (error) {
-      console.error('Error playing song:', error);
+      console.error("Error playing song:", error);
       setIsPlaying(false);
     }
   };
@@ -199,6 +216,54 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     }
   };
 
+  const playNext = () => {
+    if (!currentSong || queue.length === 0) return;
+
+    let nextSong: Song;
+
+    if (isShuffle) {
+      const remainingSongs = queue.filter((s) => s.id !== currentSong.id);
+      if (remainingSongs.length === 0) {
+        nextSong = currentSong;
+      } else {
+        const randomIndex = Math.floor(Math.random() * remainingSongs.length);
+        nextSong = remainingSongs[randomIndex];
+      }
+    } else {
+      const currentIndex = queue.findIndex((s) => s.id === currentSong.id);
+      const nextIndex = (currentIndex + 1) % queue.length;
+      nextSong = queue[nextIndex];
+    }
+
+    play(nextSong);
+  };
+
+  const playPrevious = () => {
+    if (!currentSong || queue.length === 0) return;
+
+    let prevSong: Song;
+
+    if (isShuffle) {
+      const remainingSongs = queue.filter((s) => s.id !== currentSong.id);
+      if (remainingSongs.length === 0) {
+        prevSong = currentSong;
+      } else {
+        const randomIndex = Math.floor(Math.random() * remainingSongs.length);
+        prevSong = remainingSongs[randomIndex];
+      }
+    } else {
+      const currentIndex = queue.findIndex((s) => s.id === currentSong.id);
+      const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
+      prevSong = queue[prevIndex];
+    }
+
+    play(prevSong);
+  };
+
+  const toggleShuffle = () => {
+    setIsShuffle(!isShuffle);
+  };
+
   return (
     <PlayerContext.Provider
       value={{
@@ -206,11 +271,15 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
         isPlaying,
         currentTime,
         duration,
+        isShuffle,
         play,
         pause,
         resume,
         stop,
         seekTo,
+        playNext,
+        playPrevious,
+        toggleShuffle,
       }}
     >
       {children}

@@ -17,7 +17,19 @@ interface PlayerProps {
 }
 
 const Player = ({ onExpand }: PlayerProps) => {
-  const { currentSong, isPlaying, currentTime, duration, pause, resume, seekTo } = usePlayer();
+  const {
+    currentSong,
+    isPlaying,
+    currentTime,
+    duration,
+    isShuffle,
+    pause,
+    resume,
+    seekTo,
+    playNext,
+    playPrevious,
+    toggleShuffle,
+  } = usePlayer();
 
   const handlePlayPause = () => {
     if (isPlaying) {
@@ -37,10 +49,10 @@ const Player = ({ onExpand }: PlayerProps) => {
   };
 
   const formatTime = (seconds: number): string => {
-    if (!seconds || isNaN(seconds)) return '0:00';
+    if (!seconds || isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -74,14 +86,21 @@ const Player = ({ onExpand }: PlayerProps) => {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-14 h-14 bg-gradient-card rounded overflow-hidden flex-shrink-0">
               <img
-                src={currentSong.thumbnail || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"}
+                src={
+                  currentSong.thumbnail ||
+                  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop"
+                }
                 alt={currentSong.title}
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="min-w-0 flex-1">
-              <h4 className="font-semibold text-sm truncate">{currentSong.title}</h4>
-              <p className="text-xs text-muted-foreground truncate">{currentSong.artist}</p>
+              <h4 className="font-semibold text-sm truncate">
+                {currentSong.title}
+              </h4>
+              <p className="text-xs text-muted-foreground truncate">
+                {currentSong.artist}
+              </p>
             </div>
           </div>
 
@@ -90,7 +109,10 @@ const Player = ({ onExpand }: PlayerProps) => {
             <Button
               size="icon"
               variant="ghost"
-              className="text-muted-foreground hover:text-foreground"
+              className={`text-muted-foreground hover:text-foreground ${
+                isShuffle ? "text-primary" : ""
+              }`}
+              onClick={toggleShuffle}
             >
               <Shuffle className="h-4 w-4" />
             </Button>
@@ -98,6 +120,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               size="icon"
               variant="ghost"
               className="text-foreground hover:text-primary"
+              onClick={playPrevious}
             >
               <SkipBack className="h-5 w-5" />
             </Button>
@@ -116,6 +139,7 @@ const Player = ({ onExpand }: PlayerProps) => {
               size="icon"
               variant="ghost"
               className="text-foreground hover:text-primary"
+              onClick={playNext}
             >
               <SkipForward className="h-5 w-5" />
             </Button>
