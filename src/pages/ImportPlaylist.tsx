@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { playlistService } from "@/services";
-import { FileJson, Upload, Link as LinkIcon, Loader2 } from "lucide-react";
+import { FileJson, Upload, LinkIcon, Loader2 } from "lucide-react";
 import Player from "@/components/Player";
 import VideoModal from "@/components/VideoModal";
 
@@ -21,6 +21,61 @@ const ImportPlaylist = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const data = JSON.parse(content);
+
+        // Check if it's a single playlist or array
+        if (Array.isArray(data)) {
+          const count = playlistService.importPlaylists(data);
+          if (count > 0) {
+            toast({
+              title: "Importação concluída",
+              description: `${count} playlists foram importadas com sucesso.`,
+            });
+            navigate("/");
+          } else {
+            toast({
+              title: "Erro na importação",
+              description: "Nenhuma playlist válida encontrada no arquivo.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          // Try single playlist import
+          const newPlaylist = playlistService.importPlaylist(data);
+          if (newPlaylist) {
+            toast({
+              title: "Playlist importada!",
+              description: `A playlist "${newPlaylist.name}" foi criada com sucesso.`,
+            });
+            navigate(`/playlist/${newPlaylist.id}`);
+          } else {
+            toast({
+              title: "Erro na importação",
+              description: "Formato de arquivo inválido.",
+              variant: "destructive",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing file:", error);
+        toast({
+          title: "Erro na importação",
+          description: "O arquivo não é um JSON válido.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const handleImport = async () => {
     setError("");
@@ -116,7 +171,7 @@ const ImportPlaylist = () => {
             onValueChange={setActiveTab}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="json">
                 <FileJson className="h-4 w-4 mr-2" />
                 Colar JSON
@@ -124,6 +179,10 @@ const ImportPlaylist = () => {
               <TabsTrigger value="url">
                 <LinkIcon className="h-4 w-4 mr-2" />
                 Importar de URL
+              </TabsTrigger>
+              <TabsTrigger value="file">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload de Arquivo
               </TabsTrigger>
             </TabsList>
 
@@ -144,45 +203,71 @@ const ImportPlaylist = () => {
 
             <TabsContent value="url" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="url-input">URL do Arquivo JSON</Label>
-                <div className="relative">
-                  <Input
-                    id="url-input"
-                    placeholder="https://exemplo.com/playlist.json"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  O link deve apontar diretamente para um arquivo JSON raw.
+                <Label htmlFor="url-input">URL do JSON</Label>
+                <Input
+                  id="url-input"
+                  placeholder="https://exemplo.com/playlist.json"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  A URL deve retornar um JSON válido com a estrutura da
+                  playlist.
                 </p>
               </div>
             </TabsContent>
 
-            {error && (
-              <p className="text-sm text-destructive font-medium">{error}</p>
-            )}
+            <TabsContent value="file" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="file-upload">Selecione o arquivo JSON</Label>
+                <div className="flex items-center justify-center w-full">
+                  <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted transition-colors border-muted-foreground/25 hover:border-primary/50"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
+                      <p className="mb-2 text-sm text-muted-foreground">
+                        <span className="font-semibold">
+                          Clique para enviar
+                        </span>{" "}
+                        ou arraste e solte
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        JSON (MAX. 10MB)
+                      </p>
+                    </div>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      accept=".json"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                  </label>
+                </div>
+              </div>
+            </TabsContent>
 
-            <Button
-              onClick={handleImport}
-              className="w-full bg-primary hover:bg-primary-glow"
-              disabled={
-                isLoading ||
-                (activeTab === "json" ? !jsonInput.trim() : !urlInput.trim())
-              }
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Importando...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importar Playlist
-                </>
-              )}
-            </Button>
+            {activeTab !== "file" && (
+              <Button
+                onClick={handleImport}
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Importando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Importar Playlist
+                  </>
+                )}
+              </Button>
+            )}
           </Tabs>
         </div>
       </main>

@@ -166,6 +166,55 @@ export const playlistService = {
     }
   },
 
+  importPlaylists: (data: any[]): number => {
+    try {
+      if (!Array.isArray(data)) return 0;
+
+      const playlists = getPlaylists();
+      let count = 0;
+
+      data.forEach((item) => {
+        if (
+          !item ||
+          typeof item !== "object" ||
+          !item.name ||
+          !Array.isArray(item.songs)
+        ) {
+          return;
+        }
+
+        const newPlaylist: Playlist = {
+          id: crypto.randomUUID(),
+          name: item.name,
+          description: item.description || "",
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          songs: item.songs.map((song: any) => ({
+            id: crypto.randomUUID(),
+            title: song.title || "Sem título",
+            artist: song.artist || "Desconhecido",
+            url: song.url || "",
+            originalUrl: song.originalUrl,
+            thumbnail: song.thumbnail || "",
+            duration: song.duration || "",
+            provider: song.provider || "youtube",
+            addedAt: Date.now(),
+          })),
+        };
+        playlists.push(newPlaylist);
+        count++;
+      });
+
+      if (count > 0) {
+        savePlaylists(playlists);
+      }
+      return count;
+    } catch (error) {
+      console.error("Error importing playlists:", error);
+      return 0;
+    }
+  },
+
   convertVibeToNormal: (id: string): Playlist | null => {
     const playlists = getPlaylists();
     const index = playlists.findIndex((p) => p.id === id);

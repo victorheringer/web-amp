@@ -21,9 +21,18 @@ import {
 } from "@/components/ui/select";
 import { settingsService } from "@/services";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Trash2, LayoutGrid, List, Search, Keyboard } from "lucide-react";
+import {
+  Save,
+  Trash2,
+  LayoutGrid,
+  List,
+  Search,
+  Keyboard,
+  Download,
+} from "lucide-react";
 import VideoModal from "@/components/VideoModal";
 import { KeyboardShortcuts } from "@/services/types";
+import { playlistService } from "@/services";
 
 const Settings = () => {
   const [token, setToken] = useState("");
@@ -103,10 +112,50 @@ const Settings = () => {
     const newShortcuts = { ...shortcuts, [key]: value };
     setShortcuts(newShortcuts);
     settingsService.setShortcuts(newShortcuts);
-    toast({
-      title: "Atalho atualizado",
-      description: "O atalho foi salvo com sucesso.",
-    });
+  };
+
+  const handleExportAllPlaylists = () => {
+    try {
+      const playlists = playlistService.getAll();
+      const exportData = playlists
+        .filter((p) => !p.isVibe)
+        .map((p) => ({
+          name: p.name,
+          description: p.description,
+          songs: p.songs.map((s) => ({
+            title: s.title,
+            artist: s.artist,
+            url: s.url,
+            originalUrl: s.originalUrl,
+            thumbnail: s.thumbnail,
+            duration: s.duration,
+            provider: s.provider,
+          })),
+        }));
+
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "playlists.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Exportação concluída",
+        description: "Todas as playlists foram exportadas com sucesso.",
+      });
+    } catch (error) {
+      console.error("Erro ao exportar playlists:", error);
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível exportar as playlists.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -314,6 +363,34 @@ const Settings = () => {
                         }
                         className="bg-input border-border"
                       />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Download className="h-5 w-5 text-primary" />
+                    Gerenciamento de Dados
+                  </CardTitle>
+                  <CardDescription>
+                    Exporte suas playlists para backup ou transferência.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20">
+                      <div>
+                        <h3 className="font-medium">Exportar Playlists</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Baixe um arquivo JSON com todas as suas playlists.
+                        </p>
+                      </div>
+                      <Button onClick={handleExportAllPlaylists}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Exportar Tudo
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
