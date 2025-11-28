@@ -317,9 +317,9 @@ const Index = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => setIsVibeModalOpen(true)}
-                        className="gap-2"
+                        className="gap-2 group"
                       >
-                        <Sparkles className="h-4 w-4 text-primary" />
+                        <Sparkles className="h-4 w-4 text-primary group-hover:text-white transition-colors" />
                         Minha Vibe
                       </Button>
                       <Button
