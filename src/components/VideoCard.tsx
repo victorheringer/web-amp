@@ -1,4 +1,4 @@
-import { Play, MoreVertical, Trash2 } from "lucide-react";
+import { Play, Pause, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -16,11 +16,20 @@ interface VideoCardProps {
 }
 
 const VideoCard = ({ song, onRemove }: VideoCardProps) => {
-  const { play, currentSong, isPlaying } = usePlayer();
+  const { play, pause, resume, currentSong, isPlaying } = usePlayer();
   const isCurrentSong = currentSong?.id === song.id;
 
-  const handlePlay = () => {
-    play(song);
+  const handlePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCurrentSong) {
+      if (isPlaying) {
+        pause();
+      } else {
+        resume();
+      }
+    } else {
+      play(song);
+    }
   };
 
   const handleRemove = (e: React.MouseEvent) => {
@@ -41,13 +50,23 @@ const VideoCard = ({ song, onRemove }: VideoCardProps) => {
           alt={song.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+        <div
+          className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center ${
+            isCurrentSong && isPlaying
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100"
+          }`}
+        >
           <Button
             size="icon"
             className="h-12 w-12 rounded-full bg-primary hover:bg-primary-glow shadow-glow"
             onClick={handlePlay}
           >
-            <Play className="h-6 w-6 fill-current" />
+            {isCurrentSong && isPlaying ? (
+              <Pause className="h-6 w-6 fill-current" />
+            ) : (
+              <Play className="h-6 w-6 fill-current" />
+            )}
           </Button>
         </div>
         <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs">
