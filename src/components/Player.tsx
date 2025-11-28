@@ -82,7 +82,9 @@ const Player = ({ onExpand }: PlayerProps) => {
       {/* Visualizer Panel */}
       <div
         className={`w-full bg-black transition-all duration-500 ease-in-out overflow-hidden ${
-          isVisualizerOpen ? "h-[60vh] border-t border-white/10" : "h-0"
+          isVisualizerOpen
+            ? "h-[calc(100vh-130px)] border-t border-white/10"
+            : "h-0"
         }`}
       >
         <div className="relative w-full h-full">

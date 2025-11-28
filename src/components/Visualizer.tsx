@@ -15,16 +15,19 @@ const Visualizer = ({ isPlaying }: VisualizerProps) => {
     if (!isPlaying) return;
 
     const modes: VisualizerMode[] = ["bars", "spectrum", "wave", "circle"];
-    let currentIndex = 0;
 
     const interval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % modes.length;
-      setMode(modes[currentIndex]);
-    }, 8000); // Troca a cada 8 segundos
+      setMode((prevMode) => {
+        let nextMode;
+        do {
+          nextMode = modes[Math.floor(Math.random() * modes.length)];
+        } while (nextMode === prevMode);
+        return nextMode;
+      });
+    }, 5000); // Troca a cada 5 segundos
 
     return () => clearInterval(interval);
   }, [isPlaying]);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
