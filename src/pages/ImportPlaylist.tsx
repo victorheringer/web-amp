@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { playlistService } from "@/services";
 import { FileJson, Upload, Link as LinkIcon, Loader2 } from "lucide-react";
+import Player from "@/components/Player";
+import VideoModal from "@/components/VideoModal";
 
 const ImportPlaylist = () => {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ const ImportPlaylist = () => {
   const [urlInput, setUrlInput] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   const handleImport = async () => {
     setError("");
@@ -96,7 +99,7 @@ const ImportPlaylist = () => {
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="flex-1 overflow-y-auto pb-32 p-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
@@ -183,6 +186,13 @@ const ImportPlaylist = () => {
           </Tabs>
         </div>
       </main>
+
+      <Player onExpand={() => setIsVideoModalOpen(true)} />
+
+      <VideoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+      />
     </div>
   );
 };
