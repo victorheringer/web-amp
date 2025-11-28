@@ -15,6 +15,7 @@ const getPlaylists = (): Playlist[] => {
 
 const savePlaylists = (playlists: Playlist[]) => {
   localStorage.setItem(PLAYLISTS_STORAGE_KEY, JSON.stringify(playlists));
+  window.dispatchEvent(new Event("playlists-changed"));
 };
 
 export const playlistService = {

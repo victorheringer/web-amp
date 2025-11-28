@@ -31,8 +31,15 @@ const Sidebar = () => {
 
   // Carregar playlists do localStorage
   useEffect(() => {
-    const loadedPlaylists = playlistService.getAll();
-    setPlaylists(loadedPlaylists);
+    const loadPlaylists = () => {
+      const loadedPlaylists = playlistService.getAll();
+      setPlaylists(loadedPlaylists);
+    };
+
+    loadPlaylists();
+
+    window.addEventListener("playlists-changed", loadPlaylists);
+    return () => window.removeEventListener("playlists-changed", loadPlaylists);
   }, []);
 
   const handleCreatePlaylist = () => {
