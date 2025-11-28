@@ -86,6 +86,7 @@ const Playlist = () => {
         title: songData.title,
         artist: songData.artist,
         url: songData.url,
+        originalUrl: songData.originalUrl,
         provider: songData.provider,
         thumbnail: songData.thumbnail || "",
         duration: songData.duration || "",
@@ -180,6 +181,7 @@ const Playlist = () => {
           title: song.title,
           artist: song.artist,
           url: song.url,
+          originalUrl: song.originalUrl,
           thumbnail: song.thumbnail,
           duration: song.duration,
           provider: song.provider,
@@ -410,7 +412,24 @@ const Playlist = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          className="text-destructive focus:text-destructive cursor-pointer"
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(
+                              song.originalUrl || song.url
+                            );
+                            toast({
+                              title: "Link copiado!",
+                              description:
+                                "O link da música foi copiado para a área de transferência.",
+                            });
+                          }}
+                        >
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Compartilhar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-white focus:bg-destructive cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveSong(song.id);

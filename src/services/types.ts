@@ -5,6 +5,7 @@ export interface Song {
   title: string;
   artist: string;
   url: string; // Link for embedded
+  originalUrl?: string; // Original link for sharing
   provider: VideoProvider;
   thumbnail?: string;
   duration?: string;

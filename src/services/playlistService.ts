@@ -127,6 +127,7 @@ export const playlistService = {
           title: song.title || "Sem título",
           artist: song.artist || "Desconhecido",
           url: song.url || "",
+          originalUrl: song.originalUrl,
           thumbnail: song.thumbnail || "",
           duration: song.duration || "",
           provider: song.provider || "youtube",

@@ -1,4 +1,4 @@
-import { Play, Pause, MoreVertical, Trash2 } from "lucide-react";
+import { Play, Pause, MoreVertical, Trash2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Song } from "@/services";
 import { usePlayer } from "@/contexts/PlayerContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface VideoCardProps {
   song: Song;
@@ -18,6 +19,7 @@ interface VideoCardProps {
 
 const VideoCard = ({ song, playlist, onRemove }: VideoCardProps) => {
   const { play, pause, resume, currentSong, isPlaying } = usePlayer();
+  const { toast } = useToast();
   const isCurrentSong = currentSong?.id === song.id;
 
   const handlePlay = (e: React.MouseEvent) => {
@@ -38,6 +40,15 @@ const VideoCard = ({ song, playlist, onRemove }: VideoCardProps) => {
     if (onRemove) {
       onRemove(song.id);
     }
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(song.originalUrl || song.url);
+    toast({
+      title: "Link copiado!",
+      description: "O link da música foi copiado para a área de transferência.",
+    });
   };
 
   return (
@@ -98,29 +109,36 @@ const VideoCard = ({ song, playlist, onRemove }: VideoCardProps) => {
               {song.artist}
             </p>
           </div>
-          {onRemove && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleShare}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Compartilhar
+              </DropdownMenuItem>
+              {onRemove && (
                 <DropdownMenuItem
-                  className="text-destructive focus:text-destructive cursor-pointer"
+                  className="text-destructive focus:text-white focus:bg-destructive cursor-pointer"
                   onClick={handleRemove}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Remover da playlist
                 </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </Card>

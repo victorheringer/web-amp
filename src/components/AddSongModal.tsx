@@ -28,7 +28,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { VideoProvider } from "@/services";
 import { Loader2, Download } from "lucide-react";
-import { extractYouTubeVideoId, getYouTubeEmbedUrl, getYouTubeThumbnail } from "@/lib/videoUtils";
+import {
+  extractYouTubeVideoId,
+  getYouTubeEmbedUrl,
+  getYouTubeThumbnail,
+} from "@/lib/videoUtils";
 import { useToast } from "@/hooks/use-toast";
 
 // Declaração global para o YouTube IFrame API
@@ -43,6 +47,7 @@ const formSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   artist: z.string().min(1, "O artista é obrigatório"),
   url: z.string().min(1, "A URL é obrigatória"),
+  originalUrl: z.string().optional(),
   provider: z.enum(["youtube", "soundcloud"], {
     required_error: "Selecione um provedor",
   }),
@@ -72,6 +77,7 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
       title: "",
       artist: "",
       url: "",
+      originalUrl: "",
       provider: "youtube",
       thumbnail: "",
       duration: "",
@@ -104,7 +110,8 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
     if (provider !== "youtube") {
       toast({
         title: "Provedor não suportado",
-        description: "Extração automática disponível apenas para YouTube no momento.",
+        description:
+          "Extração automática disponível apenas para YouTube no momento.",
         variant: "destructive",
       });
       return;
@@ -114,11 +121,12 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
 
     try {
       const videoId = extractYouTubeVideoId(url);
-      
+
       if (!videoId) {
         toast({
           title: "URL inválida",
-          description: "Não foi possível extrair o ID do vídeo da URL fornecida.",
+          description:
+            "Não foi possível extrair o ID do vídeo da URL fornecida.",
           variant: "destructive",
         });
         setIsExtracting(false);
@@ -131,7 +139,7 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
           title: "Carregando...",
           description: "Aguardando API do YouTube...",
         });
-        
+
         await new Promise((resolve) => {
           const checkYT = setInterval(() => {
             if (window.YT && window.YT.Player) {
@@ -143,31 +151,34 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
       }
 
       // Criar player temporário oculto para extrair dados
-      const tempContainer = document.createElement('div');
-      tempContainer.style.display = 'none';
+      const tempContainer = document.createElement("div");
+      tempContainer.style.display = "none";
       document.body.appendChild(tempContainer);
 
       const player = new window.YT.Player(tempContainer, {
-        height: '0',
-        width: '0',
+        height: "0",
+        width: "0",
         videoId: videoId,
         events: {
           onReady: (event: any) => {
             try {
               const videoData = event.target.getVideoData();
               const duration = event.target.getDuration();
-              
+
               // Formatar duração (segundos para MM:SS)
               const minutes = Math.floor(duration / 60);
               const seconds = Math.floor(duration % 60);
-              const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+              const formattedDuration = `${minutes}:${seconds
+                .toString()
+                .padStart(2, "0")}`;
 
               // Preencher campos automaticamente
-              form.setValue('title', videoData.title || '');
-              form.setValue('artist', videoData.author || '');
-              form.setValue('url', getYouTubeEmbedUrl(videoId));
-              form.setValue('thumbnail', getYouTubeThumbnail(videoId));
-              form.setValue('duration', formattedDuration);
+              form.setValue("title", videoData.title || "");
+              form.setValue("artist", videoData.author || "");
+              form.setValue("originalUrl", url);
+              form.setValue("url", getYouTubeEmbedUrl(videoId));
+              form.setValue("thumbnail", getYouTubeThumbnail(videoId));
+              form.setValue("duration", formattedDuration);
 
               setHasExtracted(true);
 
@@ -181,10 +192,11 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
               document.body.removeChild(tempContainer);
               setIsExtracting(false);
             } catch (error) {
-              console.error('Erro ao extrair dados:', error);
+              console.error("Erro ao extrair dados:", error);
               toast({
                 title: "Erro",
-                description: "Não foi possível extrair as informações do vídeo.",
+                description:
+                  "Não foi possível extrair as informações do vídeo.",
                 variant: "destructive",
               });
               event.target.destroy();
@@ -193,20 +205,21 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
             }
           },
           onError: (event: any) => {
-            console.error('Erro no player:', event);
+            console.error("Erro no player:", event);
             toast({
               title: "Erro",
-              description: "Não foi possível carregar o vídeo. Verifique a URL.",
+              description:
+                "Não foi possível carregar o vídeo. Verifique a URL.",
               variant: "destructive",
             });
             event.target.destroy();
             document.body.removeChild(tempContainer);
             setIsExtracting(false);
-          }
-        }
+          },
+        },
       });
     } catch (error) {
-      console.error('Erro ao extrair metadados:', error);
+      console.error("Erro ao extrair metadados:", error);
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao extrair as informações.",
@@ -299,7 +312,8 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                   </div>
                   <FormMessage />
                   <p className="text-xs text-muted-foreground">
-                    Cole a URL e clique no botão para extrair informações automaticamente
+                    Cole a URL e clique no botão para extrair informações
+                    automaticamente
                   </p>
                 </FormItem>
               )}
@@ -313,7 +327,11 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                   <FormLabel>Título *</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={hasExtracted ? "Título do vídeo" : "Extraído automaticamente..."}
+                      placeholder={
+                        hasExtracted
+                          ? "Título do vídeo"
+                          : "Extraído automaticamente..."
+                      }
                       {...field}
                       className="bg-input border-border"
                       disabled={!hasExtracted}
@@ -332,7 +350,11 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                   <FormLabel>Artista/Canal *</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={hasExtracted ? "Nome do canal" : "Extraído automaticamente..."}
+                      placeholder={
+                        hasExtracted
+                          ? "Nome do canal"
+                          : "Extraído automaticamente..."
+                      }
                       {...field}
                       className="bg-input border-border"
                       disabled={!hasExtracted}
@@ -351,7 +373,9 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                   <FormLabel>Duração</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={hasExtracted ? "MM:SS" : "Extraída automaticamente..."}
+                      placeholder={
+                        hasExtracted ? "MM:SS" : "Extraída automaticamente..."
+                      }
                       {...field}
                       className="bg-input border-border"
                       disabled
@@ -370,7 +394,11 @@ const AddSongModal = ({ isOpen, onClose, onAddSong }: AddSongModalProps) => {
                   <FormLabel>Thumbnail</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={hasExtracted ? "URL da imagem" : "Extraída automaticamente..."}
+                      placeholder={
+                        hasExtracted
+                          ? "URL da imagem"
+                          : "Extraída automaticamente..."
+                      }
                       {...field}
                       className="bg-input border-border"
                       disabled
